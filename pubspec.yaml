@@ -1,6 +1,6 @@
 name: angular2_rbi
-description: Making mdl styles work with angular2
-version: 0.0.1
+description: Making MDL dynamic components work with angular2
+version: 0.0.1+1
 author: Jim Washington <washington.jim@gmail.com>
 homepage: https://github.com/jwashin/angular2-rbi-dart
 
@@ -10,9 +10,6 @@ environment:
 dependencies:
   browser: any
   angular2: any
-
-dev_dependencies:
-  test: '>=0.12.0 <0.13.0'
 
 transformers:
 - angular2:

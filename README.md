@@ -11,7 +11,7 @@ RBI stands for 'Really Bad Idea.' This is a stopgap to make the dynamic stuff in
 
 ## Usage
 
-Follow the directions at <http://www.getmdl.io> to include the styles and fonts in your loading page.
+Follow the directions at <http://www.getmdl.io> to include the styles and fonts in your loading page. But don't include the MDL JavaScript <script>link; this package substitutes for that functionality.
 
 Use the MDL classes in component templates, and assure that the directives for the '*mdl-js-x...*' classes are included in the component metadata. The directive names and selectors are in angular2_rbi/lib/directives.dart.
 
