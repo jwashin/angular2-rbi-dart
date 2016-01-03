@@ -1,0 +1,8 @@
+Since this code is a fairly straight-out Dart Language translation of the
+JavaScript in Material Design Lite, I'm indebted to Google and the contributors
+to Material Design Lite.
+
+I peeked at Material Design Lite / Dart at some points during development, so
+thanks also to Mike Mitterer.
+
+- Jim Washington
