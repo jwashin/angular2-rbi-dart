@@ -1,0 +1,19 @@
+name: angular2_rbi
+description: Making mdl styles work with angular2
+version: 0.0.1
+author: Jim Washington <washington.jim@gmail.com>
+homepage: https://github.com/jwashin/angular2-rbi-dart
+
+environment:
+  sdk: '>=1.0.0 <2.0.0'
+
+dependencies:
+  browser: any
+  angular2: any
+
+dev_dependencies:
+  test: '>=0.12.0 <0.13.0'
+
+transformers:
+- angular2:
+    entry_points: [lib/directives.dart]
