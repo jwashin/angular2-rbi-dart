@@ -48,6 +48,11 @@ Here's some example code:
       }
     }
 
+## Demo
+
+There is a demo app using this at <https://github.com/jwashin/angular2-rbi-demo>.
+
+
 ## Features and bugs
 
 This currently (3 January, 2016) seems to work with MDL 1.0.6. I have not figured out testing yet, so a contributed test harness would be graciously accepted.
