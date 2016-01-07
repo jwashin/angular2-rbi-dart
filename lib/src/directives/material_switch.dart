@@ -18,9 +18,6 @@ const String IS_DISABLED = 'is-disabled';
 const String IS_CHECKED = 'is-checked';
 const String IS_UPGRADED = 'is-upgraded';
 
-
-
-
 class SwitchBehavior {
   Element element;
   CheckboxInputElement inputElement;
@@ -47,8 +44,11 @@ class SwitchBehavior {
     inputElement.addEventListener('focus', onFocus);
     inputElement.addEventListener('blur', onBlur);
     element.addEventListener('mouseup', onMouseUp);
-    updateClasses();
-    element.classes.add(IS_UPGRADED);
+    // wait a click for angular2
+    Timer.run(() {
+      updateClasses();
+      element.classes.add(IS_UPGRADED);
+    });
   }
   onChange(Event event) {
     updateClasses();

@@ -49,9 +49,11 @@ class CheckboxBehavior {
         inputElement.addEventListener('focus', onFocus);
         inputElement.addEventListener('blur', onBlur);
         element.addEventListener('mouseup', onMouseUp);
-
-        updateClasses();
-        element.classes.add(IS_UPGRADED);
+        // wait a click for angular2 to set value
+        Timer.run(() {
+          updateClasses();
+          element.classes.add(IS_UPGRADED);
+        });
       }
     }
   }

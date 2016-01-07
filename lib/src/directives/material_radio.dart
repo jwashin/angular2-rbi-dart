@@ -50,9 +50,11 @@ class RadioBehavior {
     buttonElement.addEventListener('blur', onBlur);
     buttonElement.addEventListener('m-r-g-updated', onUpdated);
     element.addEventListener('mouseup', onMouseup);
-
-    updateClasses();
-    element.classes.add(IS_UPGRADED);
+    // wait a click for angular2 to set values
+    Timer.run(() {
+      updateClasses();
+      element.classes.add(IS_UPGRADED);
+    });
   }
 
   onUpdated(Event event) {

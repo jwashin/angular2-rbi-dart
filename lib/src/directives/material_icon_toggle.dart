@@ -37,9 +37,11 @@ class IconToggleBehavior {
     inputElement.addEventListener('focus', onFocus);
     inputElement.addEventListener('blur', onBlur);
     inputElement.addEventListener('mouseup', onMouseUp);
-
-    updateClasses();
-    element.classes.add(IS_UPGRADED);
+    // wait a click for Angular to set values
+    Timer.run(() {
+      updateClasses();
+      element.classes.add(IS_UPGRADED);
+    });
   }
   onMouseUp(Event event) {
     blur();
