@@ -1,6 +1,7 @@
 library material_textfield;
 
 import 'dart:html';
+import 'dart:async';
 
 const int NO_MAX_ROWS = -1;
 const String MAX_ROWS_ATTRIBUTE = 'maxrows';
@@ -37,8 +38,13 @@ class TextfieldBehavior {
       if (maxRows != NO_MAX_ROWS) {
         input.addEventListener('keydown', onKeyDown);
       }
-      updateClasses();
+
+      //wait a click for angular2 to init the value
+      Timer.run((){
+        updateClasses();
       element.classes.add(IS_UPGRADED);
+      }
+      );
     }
   }
 
