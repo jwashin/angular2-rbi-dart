@@ -24,7 +24,8 @@ const int TINY_TIMEOUT = 1;
 class CheckboxBehavior {
   Element element;
   InputElement inputElement;
-  CheckboxBehavior(Element this.element) {
+  CheckboxBehavior(Element this.element);
+  init(){
     if (element != null) {
       if (!element.classes.contains(IS_UPGRADED)) {
         inputElement = element.querySelector('.' + CHECKBOX_INPUT);
@@ -43,7 +44,8 @@ class CheckboxBehavior {
           Element ripple = new SpanElement()..classes.add(RIPPLE);
           rippleContainer.append(ripple);
           element.append(rippleContainer);
-          new RippleBehavior(rippleContainer);
+          RippleBehavior rb = new RippleBehavior(rippleContainer);
+          rb.init();
         }
         inputElement.addEventListener('change', onChange);
         inputElement.addEventListener('focus', onFocus);

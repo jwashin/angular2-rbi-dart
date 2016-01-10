@@ -17,7 +17,8 @@ const String IS_UPGRADED = 'is-upgraded';
 
 class SpinnerBehavior {
   Element element;
-  SpinnerBehavior(this.element) {
+  SpinnerBehavior(this.element);
+  init(){
     if (element != null) {
       for (int i = 1; i <= SPINNER_LAYER_COUNT; i++) {
         createLayer(i);

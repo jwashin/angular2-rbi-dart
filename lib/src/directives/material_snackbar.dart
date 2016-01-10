@@ -39,7 +39,8 @@ class SnackbarBehavior {
   String actionText;
 
 
-  SnackbarBehavior(this.element) {
+  SnackbarBehavior(this.element);
+  init(){
     setDefaults();
   }
 

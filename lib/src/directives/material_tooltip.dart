@@ -7,7 +7,8 @@ const String IS_ACTIVE = 'is-active';
 class TooltipBehavior {
   Element element;
 
-  TooltipBehavior(Element this.element) {
+  TooltipBehavior(Element this.element);
+  init(){
     Element forElement;
     String ForElId = element.getAttribute('for');
     if (ForElId == null) {

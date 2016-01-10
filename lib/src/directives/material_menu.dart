@@ -41,7 +41,8 @@ class MenuBehavior {
   Element forElement;
   bool closing = false;
 
-  MenuBehavior(this.element) {
+  MenuBehavior(this.element);
+  init(){
     container = new DivElement();
     container.classes.add(MENU_CONTAINER);
     element.parent.insertBefore(container, element);
@@ -78,7 +79,8 @@ class MenuBehavior {
         rippleContainer.append(ripple);
         item.append(rippleContainer);
         item.classes.add(RIPPLE_EFFECT);
-        new RippleBehavior(item);
+        RippleBehavior rb = new RippleBehavior(item);
+        rb.init();
       }
     }
     for (String klass in [

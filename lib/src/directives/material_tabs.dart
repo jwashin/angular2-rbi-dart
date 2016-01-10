@@ -16,7 +16,8 @@ const String RIPPLE_IGNORE_EVENTS = 'mdl-js-ripple-effect--ignore-events';
 class TabsBehavior {
   Element element;
 
-  TabsBehavior(this.element) {
+  TabsBehavior(this.element);
+  init(){
     if (element.classes.contains(RIPPLE_EFFECT)) {
       element.classes.add(RIPPLE_IGNORE_EVENTS);
     }
@@ -28,7 +29,8 @@ class TabsBehavior {
           ..append(ripple);
         tab.append(rippleContainer);
         tab.addEventListener('click', tabClickHandler);
-        new RippleBehavior(tab);
+        RippleBehavior rb = new RippleBehavior(tab);
+        rb.init();
       }
     }
     element.classes.add(IS_UPGRADED);

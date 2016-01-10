@@ -23,7 +23,8 @@ class SliderBehavior {
   Element backgroundLower;
   Element backgroundUpper;
 
-  SliderBehavior(this.element) {
+  SliderBehavior(this.element);
+  init(){
     Element container = new DivElement()..classes.add(SLIDER_CONTAINER);
     element.parent.insertBefore(container, element);
     element.parent.children.remove(element);

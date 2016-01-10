@@ -20,7 +20,8 @@ class ProgressBehavior {
   num _progress;
   num _buffer;
 
-  ProgressBehavior(this.element) {
+  ProgressBehavior(this.element);
+  init(){
     if (element != null) {
       progressBar = new DivElement()
         ..classes.addAll([PROGRESS_BAR, BAR, BAR1])

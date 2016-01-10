@@ -19,7 +19,8 @@ class IconToggleBehavior {
   Element element;
   InputElement inputElement;
 
-  IconToggleBehavior(this.element) {
+  IconToggleBehavior(this.element);
+  init(){
     inputElement = element.querySelector('.' + ICON_TOGGLE_INPUT);
 
     if (element.classes.contains(RIPPLE_EFFECT)) {
@@ -31,7 +32,8 @@ class IconToggleBehavior {
       Element ripple = new SpanElement()..classes.add(RIPPLE);
       rippleContainer.append(ripple);
       element.append(rippleContainer);
-      new RippleBehavior(rippleContainer);
+      RippleBehavior rb = new RippleBehavior(rippleContainer);
+      rb.init();
     }
     inputElement.addEventListener('change', onChange);
     inputElement.addEventListener('focus', onFocus);

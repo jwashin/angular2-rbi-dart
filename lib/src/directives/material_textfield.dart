@@ -19,7 +19,8 @@ class TextfieldBehavior {
   int maxRows = NO_MAX_ROWS;
   Element input;
 
-  TextfieldBehavior(Element this.element) {
+  TextfieldBehavior(Element this.element);
+  init(){
     //Element label = element.querySelector('.' + LABEL);
     input = element.querySelector('.' + TEXTFIELD_INPUT);
     if (input != null) {

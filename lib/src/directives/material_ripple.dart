@@ -25,7 +25,8 @@ class RippleBehavior {
   int boundWidth;
   int boundHeight;
 
-  RippleBehavior(this.element) {
+  RippleBehavior(this.element);
+  init(){
     if (element != null) {
       if (!element.classes.contains(HAS_RIPPLE_EVENTS)) {
         if (!element.classes.contains(RIPPLE_IGNORE_EVENTS)) {

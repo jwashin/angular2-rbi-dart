@@ -23,7 +23,8 @@ class RadioBehavior {
   Element element;
   InputElement buttonElement;
 
-  RadioBehavior(this.element) {
+  RadioBehavior(this.element);
+  init(){
     buttonElement = element.querySelector('.' + RADIO_BTN);
 
     Element outerCircle = new SpanElement()..classes.add(RADIO_OUTER_CIRCLE);
@@ -43,7 +44,8 @@ class RadioBehavior {
       Element ripple = new SpanElement()..classes.add(RIPPLE);
       rippleContainer.append(ripple);
       element.append(rippleContainer);
-      new RippleBehavior(rippleContainer);
+      RippleBehavior rb = new RippleBehavior(rippleContainer);
+      rb.init();
     }
     buttonElement.addEventListener('change', onChange);
     buttonElement.addEventListener('focus', onFocus);

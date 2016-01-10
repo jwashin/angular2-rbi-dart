@@ -67,7 +67,9 @@ class LayoutBehavior {
   DivElement obfuscator;
   MediaQueryList screenSizeMediaQuery;
 
-  LayoutBehavior(this.elem) {
+  LayoutBehavior(this.elem);
+
+  init() {
     DivElement container = new DivElement()..classes.add(CONTAINER);
     elem.parent.insertBefore(container, elem);
     elem.parent.children.remove(elem);
@@ -201,7 +203,8 @@ class LayoutBehavior {
           ripple.classes.add(RIPPLE);
           rippleContainer.append(ripple);
           tab.append(rippleContainer);
-          new RippleBehavior(tab);
+          RippleBehavior rb = new RippleBehavior(tab);
+          rb.init();
         }
         tab.addEventListener('click', tabClickHandler);
       }

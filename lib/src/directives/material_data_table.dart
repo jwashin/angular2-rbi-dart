@@ -17,7 +17,8 @@ const String CHECKBOX_INPUT = 'mdl-checkbox__input';
 class DataTableBehavior {
   Element element;
 
-  DataTableBehavior(this.element) {
+  DataTableBehavior(this.element);
+  init(){
     Element firstHeader = element.querySelector('th');
     List<Element> rows = element.querySelectorAll('tbody tr');
     List<Element> footRows = element.querySelectorAll('tfoot tr');
@@ -97,7 +98,8 @@ class DataTableBehavior {
       checkbox.addEventListener('change', selectRow(checkbox, null, opt_rows));
     }
     label.append(checkbox);
-    new CheckboxBehavior(label);
+    CheckboxBehavior cb = new CheckboxBehavior(label);
+    cb.init();
     return label;
   }
 }

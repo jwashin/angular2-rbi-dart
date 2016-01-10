@@ -22,7 +22,8 @@ class SwitchBehavior {
   Element element;
   CheckboxInputElement inputElement;
 
-  SwitchBehavior(this.element) {
+  SwitchBehavior(this.element);
+  init(){
     inputElement = element.querySelector('.' + SWITCH_INPUT);
     Element track = new DivElement()..classes.add(TRACK);
     Element thumb = new DivElement()..classes.add(THUMB);
@@ -38,7 +39,8 @@ class SwitchBehavior {
       Element ripple = new SpanElement()..classes.add(RIPPLE);
       rippleContainer.append(ripple);
       element.append(rippleContainer);
-      new RippleBehavior(rippleContainer);
+      RippleBehavior rb = new RippleBehavior(rippleContainer);
+      rb.init();
     }
     inputElement.addEventListener('change', onChange);
     inputElement.addEventListener('focus', onFocus);
