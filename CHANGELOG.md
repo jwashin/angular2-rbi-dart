@@ -13,3 +13,7 @@
 - move DOM-accessing constructor code into init() methods 
 
 - invoke init() from ngOnInit in the component.  
+
+## 0.0.4
+
+- fix mdl-badge to allow dynamic value
