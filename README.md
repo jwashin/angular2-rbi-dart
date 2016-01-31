@@ -54,6 +54,8 @@ Here's some example code:
 
 There is a demo app using this at <https://github.com/jwashin/angular2-rbi-demo>.
 
+This page at <http://www.getmdl.io> demonstrates the available [MDL components](http://www.getmdl.io/components/index.html).
+
 
 ## Features and bugs
 
