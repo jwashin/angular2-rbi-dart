@@ -21,3 +21,7 @@
 ## 0.0.5
 
 - make MaterialTextfield watch for ng-invalid while displaying validity
+
+## 0.0.6
+
+- make slider and progressbar work again 

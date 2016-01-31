@@ -17,11 +17,10 @@ class ProgressBehavior {
   Element progressBar;
   Element bufferBar;
   Element auxBar;
-  num _progress;
-  num _buffer;
+  String progress;
+  String buffer;
 
-  ProgressBehavior(this.element);
-  void init(){
+  ProgressBehavior(this.element){
     if (element != null) {
       progressBar = new DivElement()
         ..classes.addAll([PROGRESS_BAR, BAR, BAR1])
@@ -37,40 +36,5 @@ class ProgressBehavior {
       element.append(auxBar);
       element.classes.add(IS_UPGRADED);
     }
-  }
-
-  void set progress(p) {
-    if (element.classes.contains(PROGRESS_INDETERMINATE)){
-      return;
-    }
-    num value = _sanitize(p);
-    _progress = value;
-    progressBar.style.width = '$value%';
-  }
-
-  get progress => _progress;
-
-  void set buffer(p) {
-    num value = _sanitize(p);
-    _buffer = value;
-    bufferBar.style.width = '$value%';
-    auxBar.style.width = '${100-value}%';
-  }
-
-  get buffer => _buffer;
-
-  _sanitize(inData) {
-    num value = 0;
-    if (inData is String && inData.length > 0) {
-      value = num.parse(inData);
-    } else if (inData is num) {
-      value = inData;
-    }
-    if (value < 0) {
-      value = 0;
-    } else if (value > 100) {
-      value = 100;
-    }
-    return value;
   }
 }

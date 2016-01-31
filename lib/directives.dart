@@ -68,11 +68,26 @@ class MaterialMenu extends MenuBehavior implements OnInit {
   }
 }
 
+// progress and buffer should be String representation of nums from 0 to 100
 @Directive(selector: '.mdl-js-progress', inputs: const ['progress', 'buffer'])
-class MaterialProgress extends ProgressBehavior implements OnInit {
+class MaterialProgress extends ProgressBehavior implements OnChanges {
   MaterialProgress(ElementRef ref) : super(ref.nativeElement);
-  void ngOnInit() {
-    init();
+
+  void ngOnChanges(Map<String, SimpleChange> changeRecord) {
+    if (changeRecord.containsKey('progress')) {
+      String value = changeRecord['progress'].currentValue;
+      element.setAttribute('progress', '$value');
+      if (!element.classes.contains('mdl-progress__indeterminate')) {
+        progressBar.style.width = '$value%';
+      }
+    }
+    if (changeRecord.containsKey('buffer')) {
+      String value = changeRecord['buffer'].currentValue;
+      element.setAttribute('buffer', '$value');
+      num asNumber = num.parse(value);
+      bufferBar.style.width = '$asNumber%';
+      auxBar.style.width = '${100 - asNumber}%';
+    }
   }
 }
 
@@ -94,10 +109,11 @@ class MaterialRipple extends RippleBehavior implements OnInit {
 
 @Directive(
     selector: '.mdl-js-slider', inputs: const ['min', 'max', 'value', 'step'])
-class MaterialSlider extends SliderBehavior implements OnInit {
+class MaterialSlider extends SliderBehavior implements OnChanges {
   MaterialSlider(ElementRef ref) : super(ref.nativeElement);
-  void ngOnInit() {
-    init();
+
+  void ngOnChanges(Map<String, SimpleChange> changeRecord) {
+    updateValueStyles();
   }
 }
 
@@ -154,7 +170,8 @@ class MaterialBadge implements OnChanges {
   @Input('data-badge') String badge;
   ElementRef ref;
   MaterialBadge(this.ref);
-  void ngOnChanges(Map<String,SimpleChange> changeRecord) {
+
+  void ngOnChanges(Map<String, SimpleChange> changeRecord) {
     ref.nativeElement.setAttribute('data-badge', '$badge');
   }
 }

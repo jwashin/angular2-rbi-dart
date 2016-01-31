@@ -1,6 +1,6 @@
 name: angular2_rbi
 description: Making MDL dynamic components work with Angular 2
-version: 0.0.5
+version: 0.0.6
 author: Jim Washington <washington.jim@gmail.com>
 homepage: https://github.com/jwashin/angular2-rbi-dart
 
