@@ -30,7 +30,7 @@ class ButtonBehavior {
 
   enable() {
     if (element is ButtonElement) {
-      ButtonElement t = element as ButtonElement;
+      ButtonElement t = element;
       t.disabled = false;
     }
     element.classes.remove(BUTTON_DISABLED);
@@ -38,7 +38,7 @@ class ButtonBehavior {
 
   disable() {
     if (element is ButtonElement) {
-      ButtonElement t = element as ButtonElement;
+      ButtonElement t = element;
       t.disabled = true;
     }
     element.classes.add(BUTTON_DISABLED);

@@ -19,9 +19,8 @@ class TextfieldBehavior {
   int maxRows = NO_MAX_ROWS;
   Element input;
 
-  TextfieldBehavior(Element this.element);
-  init(){
-    //Element label = element.querySelector('.' + LABEL);
+  TextfieldBehavior(this.element);
+  void init() {
     input = element.querySelector('.' + TEXTFIELD_INPUT);
     if (input != null) {
       if (input.attributes.containsKey(MAX_ROWS_ATTRIBUTE)) {
@@ -41,15 +40,14 @@ class TextfieldBehavior {
       }
 
       //wait a click for angular2 to init the value
-      Timer.run((){
+      Timer.run(() {
         updateClasses();
-      element.classes.add(IS_UPGRADED);
-      }
-      );
+        element.classes.add(IS_UPGRADED);
+      });
     }
   }
 
-  onKeyDown(KeyboardEvent event) {
+  void onKeyDown(KeyboardEvent event) {
     InputElement target = event.target;
     int currentRowCount = target.value.split('\n').length;
     if (event.keyCode == 13) {
@@ -59,68 +57,67 @@ class TextfieldBehavior {
     }
   }
 
-  onInput(Event event) {
+  void onInput(Event event) {
     updateClasses();
   }
 
-  onFocus(Event event) {
+  void onFocus(Event event) {
     element.classes.add(IS_FOCUSED);
   }
 
-  onBlur(Event event) {
+  void onBlur(Event event) {
     element.classes.remove(IS_FOCUSED);
   }
 
-  onReset(Event event) {
+  void onReset(Event event) {
     updateClasses();
   }
 
-  updateClasses() {
+  void updateClasses() {
     checkDisabled();
     checkValidity();
     checkDirty();
   }
 
-  checkDisabled() {
-    bool disabled;
+  void checkDisabled() {
+    bool disabled = false;
     if (input is TextInputElement) {
-      TextInputElement test = input as TextInputElement;
+      TextInputElement test = input;
       disabled = test.disabled;
     } else if (input is TextAreaElement) {
-      TextAreaElement test = input as TextAreaElement;
+      TextAreaElement test = input;
       disabled = test.disabled;
     }
-    if (disabled == true) {
+    if (disabled) {
       element.classes.add(IS_DISABLED);
     } else {
       element.classes.remove(IS_DISABLED);
     }
   }
 
-  checkValidity() {
+  void checkValidity() {
     ValidityState validity;
     if (input is TextInputElement) {
-      TextInputElement test = input as TextInputElement;
+      TextInputElement test = input;
       validity = test.validity;
     } else if (input is TextAreaElement) {
-      TextAreaElement test = input as TextAreaElement;
+      TextAreaElement test = input;
       validity = test.validity;
     }
-
-    if (validity.valid) {
+    if (validity.valid && !input.classes.contains('ng-invalid')) {
       element.classes.remove(IS_INVALID);
     } else {
       element.classes.add(IS_INVALID);
     }
   }
 
-  checkDirty() {
+  void checkDirty() {
     String value;
     if (input is TextInputElement) {
-      TextInputElement test = input as TextInputElement;
+      TextInputElement test = input;
       value = test.value;
     } else if (input is TextAreaElement) {
-      TextAreaElement test = input as TextAreaElement;
+      TextAreaElement test = input;
       value = test.value;
     }
     if (value != null && value.length > 0) {
@@ -130,33 +127,33 @@ class TextfieldBehavior {
     }
   }
 
-  disable() {
+  void disable() {
     if (input is TextInputElement) {
-      TextInputElement test = input as TextInputElement;
+      TextInputElement test = input;
       test.disabled = true;
     } else if (input is TextAreaElement) {
-      TextAreaElement test = input as TextAreaElement;
+      TextAreaElement test = input;
       test.disabled = true;
     }
   }
 
-  enable() {
+  void enable() {
     if (input is TextInputElement) {
-      TextInputElement test = input as TextInputElement;
+      TextInputElement test = input;
       test.disabled = false;
     } else if (input is TextAreaElement) {
-      TextAreaElement test = input as TextAreaElement;
+      TextAreaElement test = input;
       test.disabled = false;
     }
   }
 
-  change(value) {
+  void change(String value) {
     if (value != null && value is String) {
       if (input is TextInputElement) {
-        TextInputElement test = input as TextInputElement;
+        TextInputElement test = input;
         test.value = value;
       } else if (input is TextAreaElement) {
-        TextAreaElement test = input as TextAreaElement;
+        TextAreaElement test = input;
         test.value = value;
       }
     }
