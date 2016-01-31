@@ -151,7 +151,7 @@ class MaterialSnackbar extends SnackbarBehavior implements OnInit {
 
 @Directive(selector: '.mdl-badge')
 class MaterialBadge implements OnChanges {
-  @Input('data-badge') var badge;
+  @Input('data-badge') String badge;
   ElementRef ref;
   MaterialBadge(this.ref);
   void ngOnChanges(Map<String,SimpleChange> changeRecord) {
