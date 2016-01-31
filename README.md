@@ -15,6 +15,8 @@ Follow the directions at <http://www.getmdl.io> to include the styles and fonts 
 
 Use the MDL classes in component templates, and assure that the directives for the '*mdl-js-x...*' classes are included in the component metadata. The directive names and selectors are in angular2_rbi/lib/directives.dart.
 
+Clues for difficulties might be found in the source of the MDL stylesheet.
+
 Here's some example code:
 
     import 'package:angular2/angular2.dart';
@@ -55,7 +57,7 @@ There is a demo app using this at <https://github.com/jwashin/angular2-rbi-demo>
 
 ## Features and bugs
 
-This currently (3 January, 2016) seems to work with MDL 1.0.6. I have not figured out testing yet, so a contributed test harness would be graciously accepted.
+This currently (31 January, 2016) seems to work with MDL 1.0.6. I have not figured out testing yet, so a contributed test harness would be graciously accepted.
 
 Please file issues with MDL at [Github: Material Design Lite] (https://github.com/google/material-design-lite). And be nice. They have a system to decide what needs to happen when.
 
