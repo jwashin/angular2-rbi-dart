@@ -17,3 +17,7 @@
 ## 0.0.4
 
 - fix mdl-badge to allow dynamic value
+
+## 0.0.5
+
+- make MaterialTextfield watch for ng-invalid while displaying validity

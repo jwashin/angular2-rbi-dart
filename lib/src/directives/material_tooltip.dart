@@ -7,15 +7,15 @@ const String IS_ACTIVE = 'is-active';
 class TooltipBehavior {
   Element element;
 
-  TooltipBehavior(Element this.element);
-  init(){
+  TooltipBehavior(this.element);
+  void init() {
     Element forElement;
-    String ForElId = element.getAttribute('for');
-    if (ForElId == null) {
-      ForElId = element.getAttribute('data-for');
+    String forElementId = element.getAttribute('for');
+    if (forElementId == null) {
+      forElementId = element.getAttribute('data-for');
     }
-    if (ForElId != null) {
-      forElement = document.getElementById(ForElId);
+    if (forElementId != null) {
+      forElement = document.getElementById(forElementId);
       if (forElement != null) {
         if (!forElement.attributes.containsKey('tabindex')) {
           forElement.setAttribute('tabindex', '0');
@@ -28,7 +28,8 @@ class TooltipBehavior {
       }
     }
   }
-  handleMouseEnter(Event event) {
+
+  void handleMouseEnter(Event event) {
     event.stopPropagation();
     Element target = event.target;
     Rectangle props = target.getBoundingClientRect();
@@ -48,7 +49,7 @@ class TooltipBehavior {
     window.addEventListener('touchmove', handleMouseLeave, false);
   }
 
-  handleMouseLeave(Event event) {
+  void handleMouseLeave(Event event) {
     event.stopPropagation();
     element.classes.remove(IS_ACTIVE);
     window.removeEventListener('scroll', handleMouseLeave);

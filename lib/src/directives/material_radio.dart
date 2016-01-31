@@ -24,7 +24,7 @@ class RadioBehavior {
   InputElement buttonElement;
 
   RadioBehavior(this.element);
-  init(){
+  void init(){
     buttonElement = element.querySelector('.' + RADIO_BTN);
 
     Element outerCircle = new SpanElement()..classes.add(RADIO_OUTER_CIRCLE);
@@ -59,44 +59,44 @@ class RadioBehavior {
     });
   }
 
-  onUpdated(Event event) {
+  void onUpdated(Event event) {
     updateClasses();
   }
 
-  onChange(Event event) {
+  void onChange(Event event) {
     List<Element> radios = document.querySelectorAll('.' + JS_RADIO);
     String name = buttonElement.getAttribute('name');
     for (Element radio in radios) {
       Element button = radio
-          .querySelector("input[type='radio'][name='${name}']." + RADIO_BTN);
+          .querySelector("input[type='radio'][name='$name']." + RADIO_BTN);
       button.dispatchEvent(new CustomEvent('m-r-g-updated'));
     }
   }
 
-  onFocus(Event event) {
+  void onFocus(Event event) {
     element.classes.add(IS_FOCUSED);
   }
 
-  onBlur(Event event) {
+  void onBlur(Event event) {
     element.classes.remove(IS_FOCUSED);
   }
 
-  blur() {
+  void blur() {
     Timer.run(() {
       buttonElement.blur();
     });
   }
 
-  onMouseup(Event event) {
+  void onMouseup(Event event) {
     blur();
   }
 
-  updateClasses() {
+  void updateClasses() {
     checkDisabled();
     checkToggleState();
   }
 
-  checkToggleState() {
+  void checkToggleState() {
     if (buttonElement.checked) {
       element.classes.add(IS_CHECKED);
     } else {
@@ -104,7 +104,7 @@ class RadioBehavior {
     }
   }
 
-  checkDisabled() {
+  void checkDisabled() {
     if (buttonElement.disabled) {
       element.classes.add(IS_DISABLED);
     } else {
@@ -112,19 +112,19 @@ class RadioBehavior {
     }
   }
 
-  disable() {
+  void disable() {
     buttonElement.disabled = true;
   }
 
-  enable() {
+  void enable() {
     buttonElement.disabled = false;
   }
 
-  check() {
+  void check() {
     buttonElement.checked = true;
   }
 
-  uncheck() {
+  void uncheck() {
     buttonElement.checked = false;
   }
 }

@@ -18,7 +18,7 @@ class DataTableBehavior {
   Element element;
 
   DataTableBehavior(this.element);
-  init(){
+  void init(){
     Element firstHeader = element.querySelector('th');
     List<Element> rows = element.querySelectorAll('tbody tr');
     List<Element> footRows = element.querySelectorAll('tfoot tr');
@@ -44,8 +44,8 @@ class DataTableBehavior {
     element.classes.add(IS_UPGRADED);
   }
 
-  selectRow(
-      CheckboxInputElement checkbox, Element row, List<Element> opt_rows) {
+  Function selectRow(
+      CheckboxInputElement checkbox, Element row, List<Element> optRows) {
     if (row != null) {
       return ((Event event) {
         if (checkbox.checked) {
@@ -57,7 +57,7 @@ class DataTableBehavior {
     } else {
       return ((Event event) {
         if (checkbox.checked) {
-          for (Element row in opt_rows) {
+          for (Element row in optRows) {
             CheckboxInputElement el =
                 row.querySelector('td .' + CHECKBOX_INPUT);
             el.checked = true;
@@ -65,7 +65,7 @@ class DataTableBehavior {
             row.classes.add(IS_SELECTED);
           }
         } else {
-          for (Element row in opt_rows) {
+          for (Element row in optRows) {
             CheckboxInputElement el =
                 row.querySelector('td .' + CHECKBOX_INPUT);
             el.checked = false;
@@ -77,7 +77,7 @@ class DataTableBehavior {
     }
   }
 
-  createCheckbox(Element row, List<Element> opt_rows) {
+  LabelElement createCheckbox(Element row, List<Element> optRows) {
     LabelElement label = new LabelElement()
       ..classes
           .addAll([CHECKBOX, JS_CHECKBOX, RIPPLE_EFFECT, DATA_TABLE_SELECT]);
@@ -94,8 +94,8 @@ class DataTableBehavior {
       if (row.dataset.containsKey('mdlDataTableSelectableValue')) {
         checkbox.value = row.dataset['mdlDataTableSelectableValue'];
       }
-    } else if (opt_rows != null) {
-      checkbox.addEventListener('change', selectRow(checkbox, null, opt_rows));
+    } else if (optRows != null) {
+      checkbox.addEventListener('change', selectRow(checkbox, null, optRows));
     }
     label.append(checkbox);
     CheckboxBehavior cb = new CheckboxBehavior(label);

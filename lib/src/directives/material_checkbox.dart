@@ -24,8 +24,8 @@ const int TINY_TIMEOUT = 1;
 class CheckboxBehavior {
   Element element;
   InputElement inputElement;
-  CheckboxBehavior(Element this.element);
-  init(){
+  CheckboxBehavior(this.element);
+  void init(){
     if (element != null) {
       if (!element.classes.contains(IS_UPGRADED)) {
         inputElement = element.querySelector('.' + CHECKBOX_INPUT);
@@ -60,34 +60,34 @@ class CheckboxBehavior {
     }
   }
 
-  onChange(Event event) {
+  void onChange(Event event) {
     updateClasses();
   }
 
-  onFocus(Event event) {
+  void onFocus(Event event) {
     element.classes.add(IS_FOCUSED);
   }
 
-  onBlur(Event event) {
+  void onBlur(Event event) {
     element.classes.remove(IS_FOCUSED);
   }
 
-  blur() {
+  void blur() {
     Timer.run(() {
       inputElement.blur();
     });
   }
 
-  onMouseUp(Event event) {
+  void onMouseUp(Event event) {
     blur();
   }
 
-  updateClasses() {
+  void updateClasses() {
     checkDisabled();
     checkToggleState();
   }
 
-  checkToggleState() {
+  void checkToggleState() {
     if (inputElement.checked) {
       element.classes.add(IS_CHECKED);
     } else {
@@ -95,7 +95,7 @@ class CheckboxBehavior {
     }
   }
 
-  checkDisabled() {
+  void checkDisabled() {
     if (inputElement.disabled) {
       element.classes.add(IS_DISABLED);
     } else {
@@ -103,22 +103,22 @@ class CheckboxBehavior {
     }
   }
 
-  disable() {
+  void disable() {
     inputElement.disabled = true;
     updateClasses();
   }
 
-  enable() {
+  void enable() {
     inputElement.disabled = false;
     updateClasses();
   }
 
-  check() {
+  void check() {
     inputElement.checked = true;
     updateClasses();
   }
 
-  uncheck() {
+  void uncheck() {
     inputElement.checked = false;
     updateClasses();
   }

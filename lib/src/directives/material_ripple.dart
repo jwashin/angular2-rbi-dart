@@ -26,7 +26,7 @@ class RippleBehavior {
   int boundHeight;
 
   RippleBehavior(this.element);
-  init(){
+  void init(){
     if (element != null) {
       if (!element.classes.contains(HAS_RIPPLE_EVENTS)) {
         if (!element.classes.contains(RIPPLE_IGNORE_EVENTS)) {
@@ -43,7 +43,7 @@ class RippleBehavior {
     }
   }
 
-  upHandler(Event event) {
+  void upHandler(Event event) {
     if (rippleElement != null) {
       if (event is MouseEvent) {
         if (event != null && event.detail != 2) {
@@ -57,7 +57,7 @@ class RippleBehavior {
     }
   }
 
-  downHandler(Event event) {
+  void downHandler(Event event) {
     if (rippleElement.style.width == '' && rippleElement.style.height == '') {
       Rectangle rect = element.getBoundingClientRect();
       boundHeight = rect.height.toInt();
@@ -97,7 +97,7 @@ class RippleBehavior {
     });
   }
 
-  setRippleStyles(bool start) {
+  void setRippleStyles(bool start) {
     if (rippleElement != null) {
       String transformString, scale;
       String offset = 'translate(${x}px, ${y}px)';
@@ -119,7 +119,7 @@ class RippleBehavior {
     }
   }
 
-  animationFrameHandler() {
+  void animationFrameHandler() {
     if (frameCount-- > 0) {
       window.animationFrame.then((_) {
         animationFrameHandler();

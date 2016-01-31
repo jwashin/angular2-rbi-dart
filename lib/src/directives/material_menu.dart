@@ -42,7 +42,7 @@ class MenuBehavior {
   bool closing = false;
 
   MenuBehavior(this.element);
-  init(){
+  void init(){
     container = new DivElement();
     container.classes.add(MENU_CONTAINER);
     element.parent.insertBefore(container, element);
@@ -97,7 +97,7 @@ class MenuBehavior {
     container.classes.add(IS_UPGRADED);
   }
 
-  handleForClick(Event event) {
+  void handleForClick(Event event) {
     if (element != null && forElement != null) {
       Rectangle rect = forElement.getBoundingClientRect();
       Rectangle forRect = forElement.parent.getBoundingClientRect();
@@ -122,7 +122,7 @@ class MenuBehavior {
     toggle(event);
   }
 
-  handleForKeyboardEvent(KeyboardEvent event) {
+  void handleForKeyboardEvent(KeyboardEvent event) {
     if (element != null && container != null && forElement != null) {
       List<Element> items =
           element.querySelectorAll('.' + ITEM + ':not([disabled])');
@@ -138,7 +138,7 @@ class MenuBehavior {
     }
   }
 
-  handleItemKeyboardEvent(KeyboardEvent event) {
+  void handleItemKeyboardEvent(KeyboardEvent event) {
     if (element != null && container != null) {
       List<Element> items =
           element.querySelectorAll('.' + ITEM + ':not([disabled])');
@@ -174,8 +174,8 @@ class MenuBehavior {
     }
   }
 
-  handleItemClick(Event event) {
-    Element target = event.target as Element;
+  void handleItemClick(Event event) {
+    Element target = event.target;
     if (target.getAttribute('disabled') != null) {
       event.stopPropagation();
     } else {
@@ -190,7 +190,7 @@ class MenuBehavior {
     }
   }
 
-  toggle(Event event) {
+  void toggle(Event event) {
     if (container.classes.contains(IS_VISIBLE)) {
       hide();
     } else {
@@ -198,7 +198,7 @@ class MenuBehavior {
     }
   }
 
-  hide() {
+  void hide() {
     if (element != null && container != null && outline != null) {
       List<Element> items = element.querySelectorAll('.' + ITEM);
       for (Element item in items) {
@@ -212,7 +212,7 @@ class MenuBehavior {
     }
   }
 
-  show(Event event) {
+  void show(Event event) {
     if (element != null && container != null && outline != null) {
       Rectangle rect = element.getBoundingClientRect();
       int height = rect.height.toInt();
@@ -222,7 +222,7 @@ class MenuBehavior {
       outline.style.width = '${width}px';
       outline.style.height = '${height}px';
 
-      double transitionDuration =
+      num transitionDuration =
           TRANSITION_DURATION_SECONDS * TRANSITION_DURATION_FRACTION;
 
       List<Element> items = element.querySelectorAll('.' + ITEM);
@@ -253,13 +253,13 @@ class MenuBehavior {
     }
   }
 
-  doAnimation(height, width) {
+  void doAnimation(num height, num width) {
     element.classes.add(IS_ANIMATING);
     element.style.clip = 'rect(0 ${width}px ${height}px 0)';
     container.classes.add(IS_VISIBLE);
   }
 
-  applyClip(height, width) {
+  void applyClip(num height, num width) {
     if (element.classes.contains(UNALIGNED)) {
       element.style.clip = '';
     } else if (element.classes.contains(BOTTOM_RIGHT)) {
@@ -274,12 +274,12 @@ class MenuBehavior {
     }
   }
 
-  addAnimationEndListener() {
+  void addAnimationEndListener() {
     element.addEventListener('transitionend', transitionCleanup);
     element.addEventListener('webkitTransitionend', transitionCleanup);
   }
 
-  transitionCleanup(Event event) {
+  void transitionCleanup(Event event) {
     element.removeEventListener('transitionend', transitionCleanup);
     element.removeEventListener('webkitTransitionend', transitionCleanup);
     element.classes.remove(IS_ANIMATING);

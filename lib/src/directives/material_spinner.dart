@@ -18,7 +18,7 @@ const String IS_UPGRADED = 'is-upgraded';
 class SpinnerBehavior {
   Element element;
   SpinnerBehavior(this.element);
-  init(){
+  void init(){
     if (element != null) {
       for (int i = 1; i <= SPINNER_LAYER_COUNT; i++) {
         createLayer(i);
@@ -27,9 +27,9 @@ class SpinnerBehavior {
     }
   }
 
-  createLayer(index) {
+  void createLayer(int index) {
     Element layer = new DivElement()
-      ..classes.addAll([SPINNER_LAYER, '${SPINNER_LAYER}-${index}']);
+      ..classes.addAll([SPINNER_LAYER, '$SPINNER_LAYER-$index']);
     Element leftClipper = new DivElement()
       ..classes.addAll([SPINNER_CIRCLE_CLIPPER, SPINNER_LEFT]);
     Element gapPatch = new DivElement()..classes.add(SPINNER_GAP_PATCH);
@@ -44,11 +44,11 @@ class SpinnerBehavior {
     element.append(layer);
   }
 
-  stop() {
+  void stop() {
     element.classes.remove(IS_ACTIVE);
   }
 
-  start() {
+  void start() {
     element.classes.add(IS_ACTIVE);
   }
 }

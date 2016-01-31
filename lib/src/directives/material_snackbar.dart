@@ -40,11 +40,11 @@ class SnackbarBehavior {
 
 
   SnackbarBehavior(this.element);
-  init(){
+  void init(){
     setDefaults();
   }
 
-  showSnackbar(Map data) {
+  void showSnackbar(Map data) {
     if (active) {
       queuedNotifications.addLast(data);
     } else {
@@ -65,7 +65,7 @@ class SnackbarBehavior {
     }
   }
 
-  removeSnackbar() {
+  void removeSnackbar() {
     if (actionElement != null && actionElement.parent != null) {
       actionElement.parent.children.remove(actionElement);
     }
@@ -73,7 +73,7 @@ class SnackbarBehavior {
     snackbarElement.parent.children.remove(snackbarElement);
   }
 
-  createSnackbar() {
+  void createSnackbar() {
     textElement = new DivElement()..classes.add(MESSAGE);
     snackbarElement = new DivElement()
       ..classes.add(SNACKBAR)
@@ -94,7 +94,7 @@ class SnackbarBehavior {
     new Timer(new Duration(milliseconds: timeout), cleanup);
   }
 
-  cleanup() {
+  void cleanup() {
     snackbarElement.classes.remove(ACTIVE);
     snackbarElement.setAttribute('aria-hidden', 'true');
     if (actionElement != null) {
@@ -106,14 +106,14 @@ class SnackbarBehavior {
     checkQueue();
   }
 
-  checkQueue() {
+  void checkQueue() {
     if (queuedNotifications.length > 0) {
       Map item = queuedNotifications.removeFirst();
       showSnackbar(item);
     }
   }
 
-  setDefaults() {
+  void setDefaults() {
     actionHandler = null;
     message = null;
     actionText = null;

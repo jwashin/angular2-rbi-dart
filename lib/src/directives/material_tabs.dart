@@ -17,7 +17,7 @@ class TabsBehavior {
   Element element;
 
   TabsBehavior(this.element);
-  init(){
+  void init() {
     if (element.classes.contains(RIPPLE_EFFECT)) {
       element.classes.add(RIPPLE_IGNORE_EVENTS);
     }
@@ -36,22 +36,22 @@ class TabsBehavior {
     element.classes.add(IS_UPGRADED);
   }
 
-  get tabs => element.querySelectorAll('.' + TAB_CLASS);
-  get panels => element.querySelectorAll('.' + PANEL_CLASS);
+  List<Element> get tabs => element.querySelectorAll('.' + TAB_CLASS);
+  List<Element> get panels => element.querySelectorAll('.' + PANEL_CLASS);
 
-  resetTabState() {
+  void resetTabState() {
     for (Element k in tabs) {
       k.classes.remove(IS_ACTIVE);
     }
   }
 
-  resetPanelState() {
+  void resetPanelState() {
     for (Element j in panels) {
       j.classes.remove(IS_ACTIVE);
     }
   }
 
-  tabClickHandler(Event event) {
+  void tabClickHandler(Event event) {
     event.preventDefault();
     AnchorElement tab = event.currentTarget;
     String href = tab.href.split('#')[1];

@@ -23,7 +23,7 @@ class SwitchBehavior {
   CheckboxInputElement inputElement;
 
   SwitchBehavior(this.element);
-  init(){
+  void init() {
     inputElement = element.querySelector('.' + SWITCH_INPUT);
     Element track = new DivElement()..classes.add(TRACK);
     Element thumb = new DivElement()..classes.add(THUMB);
@@ -52,34 +52,35 @@ class SwitchBehavior {
       element.classes.add(IS_UPGRADED);
     });
   }
-  onChange(Event event) {
+
+  void onChange(Event event) {
     updateClasses();
   }
 
-  onFocus(Event event) {
+  void onFocus(Event event) {
     element.classes.add(IS_FOCUSED);
   }
 
-  onBlur(Event event) {
+  void onBlur(Event event) {
     element.classes.remove(IS_FOCUSED);
   }
 
-  onMouseUp(Event event) {
+  void onMouseUp(Event event) {
     blur();
   }
 
-  updateClasses() {
+  void updateClasses() {
     checkDisabled();
     checkToggleState();
   }
 
-  blur() {
+  void blur() {
     Timer.run(() {
       inputElement.blur();
     });
   }
 
-  checkDisabled() {
+  void checkDisabled() {
     if (inputElement.disabled) {
       element.classes.add(IS_DISABLED);
     } else {
@@ -87,7 +88,7 @@ class SwitchBehavior {
     }
   }
 
-  checkToggleState() {
+  void checkToggleState() {
     if (inputElement.checked) {
       element.classes.add(IS_CHECKED);
     } else {
@@ -95,19 +96,19 @@ class SwitchBehavior {
     }
   }
 
-  disable() {
+  void disable() {
     inputElement.disabled = true;
   }
 
-  enable() {
+  void enable() {
     inputElement.disabled = false;
   }
 
-  on() {
+  void on() {
     inputElement.checked = true;
   }
 
-  off() {
+  void off() {
     inputElement.checked = false;
   }
 }

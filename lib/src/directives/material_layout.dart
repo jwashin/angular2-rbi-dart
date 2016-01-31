@@ -69,7 +69,7 @@ class LayoutBehavior {
 
   LayoutBehavior(this.elem);
 
-  init() {
+  void init() {
     DivElement container = new DivElement()..classes.add(CONTAINER);
     elem.parent.insertBefore(container, elem);
     elem.parent.children.remove(elem);
@@ -212,10 +212,10 @@ class LayoutBehavior {
     elem.classes.add(IS_UPGRADED);
   }
 
-  get tabs => tabBar.querySelectorAll('.' + TAB);
-  get panels => content.querySelectorAll('.' + PANEL);
+  List<Element> get tabs => tabBar.querySelectorAll('.' + TAB);
+  List<Element> get panels => content.querySelectorAll('.' + PANEL);
 
-  screenSizeHandler(Event event) {
+  void screenSizeHandler(Event event) {
     if (screenSizeMediaQuery.matches) {
       elem.classes.add(IS_SMALL_SCREEN);
     } else {
@@ -227,15 +227,15 @@ class LayoutBehavior {
     }
   }
 
-  rightButtonClickHandler(Event event) {
+  void rightButtonClickHandler(Event event) {
     tabBar.scrollLeft += TAB_SCROLL_PIXELS;
   }
 
-  leftButtonClickHandler(Event event) {
+  void leftButtonClickHandler(Event event) {
     tabBar.scrollLeft -= TAB_SCROLL_PIXELS;
   }
 
-  tabScrollHandler(event) {
+  void tabScrollHandler(Event event) {
     if (tabBar.scrollLeft > 0) {
       leftButton.classes.add(IS_ACTIVE);
     } else {
@@ -248,23 +248,23 @@ class LayoutBehavior {
     }
   }
 
-  drawerToggleHandler(Event event) {
+  void drawerToggleHandler(Event event) {
     drawer.classes.toggle(IS_DRAWER_OPEN);
     obfuscator.classes.toggle(IS_DRAWER_OPEN);
   }
 
-  headerTransitionEndHandler(Event event) {
+  void headerTransitionEndHandler(Event event) {
     header.classes.remove(IS_ANIMATING);
   }
 
-  headerClickHandler(Event event) {
+  void headerClickHandler(Event event) {
     if (header.classes.contains(IS_COMPACT)) {
       header.classes.remove(IS_COMPACT);
       header.classes.add(IS_ANIMATING);
     }
   }
 
-  contentScrollHandler(Event event) {
+  void contentScrollHandler(Event event) {
     if (header.classes.contains(IS_ANIMATING)) {
       return;
     }
@@ -279,19 +279,19 @@ class LayoutBehavior {
     }
   }
 
-  resetTabState() {
+  void resetTabState() {
     for (Element el in tabs) {
       el.classes.remove(IS_ACTIVE);
     }
   }
 
-  resetPanelState() {
+  void resetPanelState() {
     for (Element el in panels) {
       el.classes.remove(IS_ACTIVE);
     }
   }
 
-  tabClickHandler(Event event) {
+  void tabClickHandler(Event event) {
     AnchorElement tab = event.currentTarget;
     if (tab.href.contains('#')) {
       event.preventDefault();
@@ -299,7 +299,7 @@ class LayoutBehavior {
     }
   }
 
-  selectTab(AnchorElement tab) {
+  void selectTab(AnchorElement tab) {
     String href = tab.href.split('#')[1];
     Element panel = content.querySelector('#' + href);
     resetTabState();

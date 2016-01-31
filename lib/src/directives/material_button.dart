@@ -12,7 +12,7 @@ const String BUTTON_DISABLED = 'mdl-button--disabled';
 class ButtonBehavior {
   HtmlElement element;
   ButtonBehavior(this.element);
-  init(){
+  void init(){
     if (element != null && element.classes.contains(RIPPLE_EFFECT)) {
       SpanElement rippleContainer = new SpanElement();
       rippleContainer.classes.add(BUTTON_RIPPLE_CONTAINER);
@@ -28,7 +28,7 @@ class ButtonBehavior {
     element.addEventListener('mouseleave', blurHandler);
   }
 
-  enable() {
+  void enable() {
     if (element is ButtonElement) {
       ButtonElement t = element;
       t.disabled = false;
@@ -36,7 +36,7 @@ class ButtonBehavior {
     element.classes.remove(BUTTON_DISABLED);
   }
 
-  disable() {
+  void disable() {
     if (element is ButtonElement) {
       ButtonElement t = element;
       t.disabled = true;
@@ -44,7 +44,7 @@ class ButtonBehavior {
     element.classes.add(BUTTON_DISABLED);
   }
 
-  blurHandler(MouseEvent event) {
+  void blurHandler(MouseEvent event) {
     Timer.run(() {
       element.blur();
     });

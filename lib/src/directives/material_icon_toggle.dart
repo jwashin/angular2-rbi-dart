@@ -20,7 +20,7 @@ class IconToggleBehavior {
   InputElement inputElement;
 
   IconToggleBehavior(this.element);
-  init(){
+  void init(){
     inputElement = element.querySelector('.' + ICON_TOGGLE_INPUT);
 
     if (element.classes.contains(RIPPLE_EFFECT)) {
@@ -45,30 +45,30 @@ class IconToggleBehavior {
       element.classes.add(IS_UPGRADED);
     });
   }
-  onMouseUp(Event event) {
+  void onMouseUp(Event event) {
     blur();
   }
 
-  onFocus(Event event) {
+  void onFocus(Event event) {
     element.classes.add(IS_FOCUSED);
   }
 
-  onBlur(Event event) {
+  void onBlur(Event event) {
     element.classes.remove(IS_FOCUSED);
   }
 
-  blur() {
+  void blur() {
     Timer.run(() {
       inputElement.blur();
     });
   }
 
-  updateClasses() {
+  void updateClasses() {
     checkDisabled();
     checkToggleState();
   }
 
-  checkToggleState() {
+  void checkToggleState() {
     if (inputElement.checked) {
       element.classes.add(IS_CHECKED);
     } else {
@@ -76,7 +76,7 @@ class IconToggleBehavior {
     }
   }
 
-  checkDisabled() {
+  void checkDisabled() {
     if (inputElement.disabled) {
       element.classes.add(IS_DISABLED);
     } else {
@@ -84,23 +84,23 @@ class IconToggleBehavior {
     }
   }
 
-  onChange(Event event) {
+  void onChange(Event event) {
     updateClasses();
   }
 
-  disable() {
+  void disable() {
     inputElement.disabled = true;
   }
 
-  enable() {
+  void enable() {
     inputElement.disabled = false;
   }
 
-  check() {
+  void check() {
     inputElement.checked = true;
   }
 
-  uncheck() {
+  void uncheck() {
     inputElement.checked = false;
   }
 }
