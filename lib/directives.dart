@@ -68,7 +68,6 @@ class MaterialMenu extends MenuBehavior implements OnInit {
   }
 }
 
-// progress and buffer are ints from 0 to 100
 @Directive(selector: '.mdl-js-progress', inputs: const ['progress', 'buffer'])
 class MaterialProgress extends ProgressBehavior implements OnInit {
   MaterialProgress(ElementRef ref) : super(ref.nativeElement);

@@ -24,7 +24,7 @@ class SliderBehavior {
   Element backgroundUpper;
 
   SliderBehavior(this.element);
-  init(){
+  void init(){
     Element container = new DivElement()..classes.add(SLIDER_CONTAINER);
     element.parent.insertBefore(container, element);
     element.parent.children.remove(element);
@@ -46,7 +46,7 @@ class SliderBehavior {
     element.classes.add(IS_UPGRADED);
   }
 
-  updateValueStyles() {
+  void updateValueStyles() {
     if (value != null && min != null && max != null) {
       num fraction = (num.parse(value) - num.parse(min)) /
           (num.parse(max) - num.parse(min));
@@ -60,7 +60,7 @@ class SliderBehavior {
     }
   }
 
-  onChange(Event event) {
+  void onChange(Event event) {
     InputElement target = event.currentTarget;
     value = target.value;
     updateValueStyles();
@@ -104,12 +104,12 @@ class SliderBehavior {
     }
   }
 
-  onInput(Event event) {
+  void onInput(Event event) {
     updateValueStyles();
   }
 
-  onMouseUp(MouseEvent event) {
-    Element target = event.currentTarget as Element;
+  void onMouseUp(MouseEvent event) {
+    Element target = event.currentTarget;
     target.blur();
   }
 }

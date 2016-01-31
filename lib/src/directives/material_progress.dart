@@ -21,7 +21,7 @@ class ProgressBehavior {
   num _buffer;
 
   ProgressBehavior(this.element);
-  init(){
+  void init(){
     if (element != null) {
       progressBar = new DivElement()
         ..classes.addAll([PROGRESS_BAR, BAR, BAR1])
@@ -39,21 +39,21 @@ class ProgressBehavior {
     }
   }
 
-  set progress(p) {
+  void set progress(p) {
     if (element.classes.contains(PROGRESS_INDETERMINATE)){
       return;
     }
     num value = _sanitize(p);
     _progress = value;
-    progressBar.style.width = '${value}%';
+    progressBar.style.width = '$value%';
   }
 
   get progress => _progress;
 
-  set buffer(p) {
+  void set buffer(p) {
     num value = _sanitize(p);
     _buffer = value;
-    bufferBar.style.width = '${value}%';
+    bufferBar.style.width = '$value%';
     auxBar.style.width = '${100-value}%';
   }
 
