@@ -69,24 +69,20 @@ class MaterialMenu extends MenuBehavior implements OnInit {
 }
 
 // progress and buffer should be String representation of nums from 0 to 100
-@Directive(selector: '.mdl-js-progress', inputs: const ['progress', 'buffer'])
+// or nums from 0 to 100
+@Directive(selector: '.mdl-js-progress')
 class MaterialProgress extends ProgressBehavior implements OnChanges {
+  @Input() dynamic progress = 0;
+  @Input() dynamic buffer = 100;
+
   MaterialProgress(ElementRef ref) : super(ref.nativeElement);
 
   void ngOnChanges(Map<String, SimpleChange> changeRecord) {
-    if (changeRecord.containsKey('progress')) {
-      String value = changeRecord['progress'].currentValue;
-      element.setAttribute('progress', '$value');
-      if (!element.classes.contains('mdl-progress__indeterminate')) {
-        progressBar.style.width = '$value%';
-      }
-    }
     if (changeRecord.containsKey('buffer')) {
-      String value = changeRecord['buffer'].currentValue;
-      element.setAttribute('buffer', '$value');
-      num asNumber = num.parse(value);
-      bufferBar.style.width = '$asNumber%';
-      auxBar.style.width = '${100 - asNumber}%';
+      updateBuffer();
+    }
+    if (changeRecord.containsKey('progress')) {
+      updateProgress();
     }
   }
 }
@@ -107,13 +103,28 @@ class MaterialRipple extends RippleBehavior implements OnInit {
   }
 }
 
-@Directive(
-    selector: '.mdl-js-slider', inputs: const ['min', 'max', 'value', 'step'])
+@Directive(selector: '.mdl-js-slider')
 class MaterialSlider extends SliderBehavior implements OnChanges {
+  @Input() dynamic min = 0;
+  @Input() dynamic max = 100;
+  @Input() dynamic value = 0;
+  @Input() dynamic step = 1;
+
+  @Output() EventEmitter valueChange = new EventEmitter();
   MaterialSlider(ElementRef ref) : super(ref.nativeElement);
 
   void ngOnChanges(Map<String, SimpleChange> changeRecord) {
+    for (String item in changeRecord.keys) {
+      element.setAttribute(item, '${changeRecord[item].currentValue}');
+    }
     updateValueStyles();
+  }
+
+  void dispatchValue(dynamic aValue) {
+    if (value is num && aValue is String) {
+      aValue = num.parse(aValue);
+    }
+    valueChange.add(aValue);
   }
 }
 
@@ -167,7 +178,7 @@ class MaterialSnackbar extends SnackbarBehavior implements OnInit {
 
 @Directive(selector: '.mdl-badge')
 class MaterialBadge implements OnChanges {
-  @Input('data-badge') String badge;
+  @Input('data-badge') dynamic badge;
   ElementRef ref;
   MaterialBadge(this.ref);
 

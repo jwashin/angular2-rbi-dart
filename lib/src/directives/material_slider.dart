@@ -13,10 +13,10 @@ const String IS_UPGRADED = 'is-upgraded';
 
 class SliderBehavior {
   InputElement element;
-  String value;
-  String max;
-  String min;
-  String step = '1';
+  dynamic value = 0;
+  dynamic max = 100;
+  dynamic min = 0;
+  dynamic step = 1;
   Element backgroundLower;
   Element backgroundUpper;
 
@@ -42,10 +42,17 @@ class SliderBehavior {
     element.classes.add(IS_UPGRADED);
   }
 
+  // void init() {
+  //   updateValueStyles();
+  // }
+
   void updateValueStyles() {
     if (value != null && min != null && max != null) {
-      num fraction = (num.parse(value) - num.parse(min)) /
-          (num.parse(max) - num.parse(min));
+      num calcValue = num.parse(element.getAttribute('value'));
+      num calcMin = num.parse(element.getAttribute('min'));
+      num calcMax = num.parse(element.getAttribute('max'));
+      double fraction =
+          (calcValue - calcMin).toDouble() / (calcMax - calcMin).toDouble();
       if (fraction == 0) {
         element.classes.add(IS_LOWEST_VALUE);
       } else {
@@ -58,7 +65,14 @@ class SliderBehavior {
 
   void onChange(Event event) {
     InputElement target = event.currentTarget;
-    value = target.value;
+    dynamic newValue = target.value;
+    if (value is num && newValue is String) {
+      newValue = num.parse(newValue);
+    }
+    print('$value, (${value.runtimeType})');
+    print('$newValue, (${newValue.runtimeType})');
+    element.setAttribute('value', '$newValue');
+    dispatchValue(newValue);
     updateValueStyles();
   }
 
@@ -69,5 +83,9 @@ class SliderBehavior {
   void onMouseUp(MouseEvent event) {
     Element target = event.currentTarget;
     target.blur();
+  }
+
+  void dispatchValue(dynamic aValue) {
+    // nop; let the directive handle this
   }
 }
