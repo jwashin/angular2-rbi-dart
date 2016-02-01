@@ -42,10 +42,6 @@ class SliderBehavior {
     element.classes.add(IS_UPGRADED);
   }
 
-  // void init() {
-  //   updateValueStyles();
-  // }
-
   void updateValueStyles() {
     if (value != null && min != null && max != null) {
       num calcValue = num.parse(element.getAttribute('value'));
@@ -69,8 +65,6 @@ class SliderBehavior {
     if (value is num && newValue is String) {
       newValue = num.parse(newValue);
     }
-    print('$value, (${value.runtimeType})');
-    print('$newValue, (${newValue.runtimeType})');
     element.setAttribute('value', '$newValue');
     dispatchValue(newValue);
     updateValueStyles();
