@@ -25,3 +25,8 @@
 ## 0.0.6
 
 - make slider and progressbar work again 
+
+## 0.0.7
+
+- make slider a more useful input widget
+- get animation frame in a more DOM-standard manner
