@@ -3,6 +3,8 @@ library material_ripple;
 import 'dart:html';
 import 'dart:async' show Timer;
 import 'dart:math' show sqrt;
+import 'package:angular2_rbi/src/util/animation_frame.dart'
+    show getAnimationFrame;
 
 const String RIPPLE_EFFECT = 'mdl-js-ripple-effect';
 const String RIPPLE_CENTER = 'mdl-ripple--center';
@@ -26,7 +28,8 @@ class RippleBehavior {
   int boundHeight;
 
   RippleBehavior(this.element);
-  void init(){
+
+  void init() {
     if (element != null) {
       if (!element.classes.contains(HAS_RIPPLE_EVENTS)) {
         if (!element.classes.contains(RIPPLE_IGNORE_EVENTS)) {
@@ -92,7 +95,7 @@ class RippleBehavior {
     }
 
     setRippleStyles(true);
-    window.animationFrame.then((_) {
+    getAnimationFrame().then((_) {
       animationFrameHandler();
     });
   }
@@ -121,7 +124,7 @@ class RippleBehavior {
 
   void animationFrameHandler() {
     if (frameCount-- > 0) {
-      window.animationFrame.then((_) {
+      getAnimationFrame().then((_) {
         animationFrameHandler();
       });
     } else {

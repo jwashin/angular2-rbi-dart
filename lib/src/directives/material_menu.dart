@@ -3,6 +3,8 @@ library material_menu;
 import 'dart:html';
 import 'material_ripple.dart' show RippleBehavior;
 import 'dart:async' show Timer;
+import 'package:angular2_rbi/src/util/animation_frame.dart'
+    show getAnimationFrame;
 
 const String MENU_CONTAINER = 'mdl-menu__container';
 const String OUTLINE = 'mdl-menu__outline';
@@ -42,7 +44,8 @@ class MenuBehavior {
   bool closing = false;
 
   MenuBehavior(this.element);
-  void init(){
+
+  void init() {
     container = new DivElement();
     container.classes.add(MENU_CONTAINER);
     element.parent.insertBefore(container, element);
@@ -53,7 +56,7 @@ class MenuBehavior {
     outline.classes.add(OUTLINE);
     container.insertBefore(outline, element);
     String forElId = element.getAttribute('for');
-    if (forElId == null){
+    if (forElId == null) {
       forElId = element.getAttribute('data-for');
     }
     if (forElId != null) {
@@ -102,8 +105,8 @@ class MenuBehavior {
       Rectangle rect = forElement.getBoundingClientRect();
       Rectangle forRect = forElement.parent.getBoundingClientRect();
 
-      if (element.classes.contains(UNALIGNED)) {
-      } else if (element.classes.contains(BOTTOM_RIGHT)) {
+      if (element.classes.contains(UNALIGNED)) {} else if (element.classes
+          .contains(BOTTOM_RIGHT)) {
         container.style.right = '${forRect.right - rect.right}px';
         container.style.top =
             '${forElement.offsetTop + forElement.offsetHeight}px';
@@ -238,7 +241,7 @@ class MenuBehavior {
         item.style.transitionDelay = itemDelay;
       }
       applyClip(height, width);
-      window.animationFrame.then((_) {
+      getAnimationFrame().then((_) {
         doAnimation(height, width);
       });
       addAnimationEndListener();
