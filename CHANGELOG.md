@@ -30,3 +30,9 @@
 
 - make slider a more useful input widget
 - get animation frame in a more DOM-standard manner
+
+## 0.0.8
+
+- Material Radio : don't dispatch event to null
+- remove event listeners OnDestroy
+
