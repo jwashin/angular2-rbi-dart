@@ -42,6 +42,12 @@ class SliderBehavior {
     element.classes.add(IS_UPGRADED);
   }
 
+  void destroy() {
+    element.removeEventListener('input', onChange);
+    element.removeEventListener('change', onChange);
+    element.removeEventListener('mouseup', onMouseUp);
+  }
+
   void updateValueStyles() {
     if (value != null && min != null && max != null) {
       num calcValue = num.parse(element.getAttribute('value'));

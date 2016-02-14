@@ -47,6 +47,16 @@ class TextfieldBehavior {
     }
   }
 
+  void destroy() {
+    input.removeEventListener('input', onInput);
+    input.removeEventListener('focus', onFocus);
+    input.removeEventListener('blur', onBlur);
+    input.removeEventListener('reset', onReset);
+    if (maxRows != NO_MAX_ROWS) {
+      input.removeEventListener('keydown', onKeyDown);
+    }
+  }
+
   void onKeyDown(KeyboardEvent event) {
     InputElement target = event.target;
     int currentRowCount = target.value.split('\n').length;

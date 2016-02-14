@@ -18,14 +18,16 @@ const String IS_UPGRADED = 'is-upgraded';
 class IconToggleBehavior {
   Element element;
   InputElement inputElement;
+  SpanElement rippleContainer;
 
   IconToggleBehavior(this.element);
-  void init(){
+
+  void init() {
     inputElement = element.querySelector('.' + ICON_TOGGLE_INPUT);
 
     if (element.classes.contains(RIPPLE_EFFECT)) {
       element.classes.add(RIPPLE_IGNORE_EVENTS);
-      Element rippleContainer = new SpanElement()
+      rippleContainer = new SpanElement()
         ..classes.addAll(
             [ICON_TOGGLE_RIPPLE_CONTAINER, RIPPLE_EFFECT, RIPPLE_CENTER]);
       rippleContainer.addEventListener('mouseup', onMouseUp);
@@ -45,6 +47,19 @@ class IconToggleBehavior {
       element.classes.add(IS_UPGRADED);
     });
   }
+
+  void destroy() {
+    inputElement.removeEventListener('change', onChange);
+    inputElement.removeEventListener('focus', onFocus);
+    inputElement.removeEventListener('blur', onBlur);
+    inputElement.removeEventListener('mouseup', onMouseUp);
+    if (element.classes.contains(RIPPLE_EFFECT)) {
+      rippleContainer.removeEventListener('mouseup', onMouseUp);
+      RippleBehavior rb = new RippleBehavior(rippleContainer);
+      rb.destroy();
+    }
+  }
+
   void onMouseUp(Event event) {
     blur();
   }

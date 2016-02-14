@@ -25,7 +25,10 @@ class CheckboxBehavior {
   Element element;
   InputElement inputElement;
   CheckboxBehavior(this.element);
-  void init(){
+
+  SpanElement rippleContainer;
+
+  void init() {
     if (element != null) {
       if (!element.classes.contains(IS_UPGRADED)) {
         inputElement = element.querySelector('.' + CHECKBOX_INPUT);
@@ -37,7 +40,7 @@ class CheckboxBehavior {
         element.append(boxOutline);
         if (element.classes.contains(RIPPLE_EFFECT)) {
           element.classes.add(RIPPLE_IGNORE_EVENTS);
-          Element rippleContainer = new SpanElement()
+          rippleContainer = new SpanElement()
             ..classes.addAll(
                 [CHECKBOX_RIPPLE_CONTAINER, RIPPLE_EFFECT, RIPPLE_CENTER]);
           rippleContainer.addEventListener('mouseup', onMouseUp);
@@ -56,6 +59,20 @@ class CheckboxBehavior {
           updateClasses();
           element.classes.add(IS_UPGRADED);
         });
+      }
+    }
+  }
+
+  void destroy() {
+    if (element != null && element.classes.contains(IS_UPGRADED)) {
+      inputElement.removeEventListener('change', onChange);
+      inputElement.removeEventListener('focus', onFocus);
+      inputElement.removeEventListener('blur', onBlur);
+      element.removeEventListener('mouseup', onMouseUp);
+      if (element.classes.contains(RIPPLE_EFFECT)) {
+        rippleContainer.removeEventListener('mouseup', onMouseUp);
+        RippleBehavior rb = new RippleBehavior(rippleContainer);
+        rb.destroy();
       }
     }
   }

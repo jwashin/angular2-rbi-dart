@@ -21,6 +21,7 @@ const String IS_UPGRADED = 'is-upgraded';
 class SwitchBehavior {
   Element element;
   CheckboxInputElement inputElement;
+  SpanElement rippleContainer;
 
   SwitchBehavior(this.element);
   void init() {
@@ -32,7 +33,7 @@ class SwitchBehavior {
     element.children.addAll([track, thumb]);
     if (element.classes.contains(RIPPLE_EFFECT)) {
       element.classes.add(RIPPLE_IGNORE_EVENTS);
-      Element rippleContainer = new SpanElement()
+      rippleContainer = new SpanElement()
         ..classes
             .addAll([SWITCH_RIPPLE_CONTAINER, RIPPLE_EFFECT, RIPPLE_CENTER])
         ..addEventListener('mouseup', onMouseUp);
@@ -51,6 +52,17 @@ class SwitchBehavior {
       updateClasses();
       element.classes.add(IS_UPGRADED);
     });
+  }
+
+  void destroy() {
+    inputElement.removeEventListener('change', onChange);
+    inputElement.removeEventListener('focus', onFocus);
+    inputElement.removeEventListener('blur', onBlur);
+    element.removeEventListener('mouseup', onMouseUp);
+    if (element.classes.contains(RIPPLE_EFFECT)) {
+      RippleBehavior rb = new RippleBehavior(rippleContainer);
+      rb.destroy();
+    }
   }
 
   void onChange(Event event) {

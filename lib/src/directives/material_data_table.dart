@@ -16,9 +16,11 @@ const String CHECKBOX_INPUT = 'mdl-checkbox__input';
 
 class DataTableBehavior {
   Element element;
+  Map<CheckboxInputElement, Function> changeListeners;
 
   DataTableBehavior(this.element);
-  void init(){
+
+  void init() {
     Element firstHeader = element.querySelector('th');
     List<Element> rows = element.querySelectorAll('tbody tr');
     List<Element> footRows = element.querySelectorAll('tfoot tr');
@@ -42,6 +44,21 @@ class DataTableBehavior {
       }
     }
     element.classes.add(IS_UPGRADED);
+  }
+
+  void destroy() {
+    if (element.classes.contains(SELECTABLE)) {
+      List<Element> checkboxLabels =
+      element.querySelectorAll('label[$DATA_TABLE_SELECT]');
+      for (LabelElement label in checkboxLabels) {
+        CheckboxBehavior cb = new CheckboxBehavior(label);
+        cb.destroy();
+      }
+      for (CheckboxInputElement checkbox in changeListeners.keys) {
+        checkbox.removeEventListener('change', changeListeners[checkbox]);
+      }
+      changeListeners.clear();
+    }
   }
 
   Function selectRow(
@@ -78,15 +95,17 @@ class DataTableBehavior {
   }
 
   LabelElement createCheckbox(Element row, List<Element> optRows) {
+    Function fn;
     LabelElement label = new LabelElement()
       ..classes
           .addAll([CHECKBOX, JS_CHECKBOX, RIPPLE_EFFECT, DATA_TABLE_SELECT]);
-    InputElement checkbox = new InputElement()
-      ..type = 'checkbox'
+    CheckboxInputElement checkbox = new CheckboxInputElement()
       ..classes.add(CHECKBOX_INPUT);
     if (row != null) {
       checkbox.checked = row.classes.contains(IS_SELECTED);
-      checkbox.addEventListener('change', selectRow(checkbox, row, null));
+      fn = selectRow(checkbox, row, null);
+      changeListeners[checkbox] = fn;
+      checkbox.addEventListener('change', fn);
 
       if (row.dataset.containsKey('mdlDataTableSelectableName')) {
         checkbox.name = row.dataset['mdlDataTableSelectableName'];
@@ -95,7 +114,9 @@ class DataTableBehavior {
         checkbox.value = row.dataset['mdlDataTableSelectableValue'];
       }
     } else if (optRows != null) {
-      checkbox.addEventListener('change', selectRow(checkbox, null, optRows));
+      fn = selectRow(checkbox, null, optRows);
+      changeListeners[checkbox] = fn;
+      checkbox.addEventListener('change', fn);
     }
     label.append(checkbox);
     CheckboxBehavior cb = new CheckboxBehavior(label);

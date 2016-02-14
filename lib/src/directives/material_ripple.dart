@@ -46,6 +46,18 @@ class RippleBehavior {
     }
   }
 
+  void destroy() {
+    if (element != null && element.classes.contains(HAS_RIPPLE_EVENTS)) {
+      element.removeEventListener('mousedown', downHandler);
+      element.removeEventListener('touchstart', downHandler);
+      element.removeEventListener('mouseup', upHandler);
+      element.removeEventListener('touchend', upHandler);
+      element.removeEventListener('mouseleave', upHandler);
+      element.removeEventListener('blur', upHandler);
+      element.classes.remove(HAS_RIPPLE_EVENTS);
+    }
+  }
+
   void upHandler(Event event) {
     if (rippleElement != null) {
       if (event is MouseEvent) {

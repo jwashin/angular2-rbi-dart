@@ -100,6 +100,27 @@ class MenuBehavior {
     container.classes.add(IS_UPGRADED);
   }
 
+  void destroy() {
+    String forElId = element.getAttribute('for');
+    if (forElId == null) {
+      forElId = element.getAttribute('data-for');
+    }
+    if (forElId != null) {
+      forElement = document.getElementById(forElId);
+      if (forElement != null) {
+        forElement.removeEventListener('click', handleForClick);
+        forElement.removeEventListener('keydown', handleForKeyboardEvent);
+      }
+    }
+    List<Element> items = element.querySelectorAll('.' + ITEM);
+    if (element.classes.contains(RIPPLE_EFFECT)) {
+      for (Element item in items) {
+        RippleBehavior rb = new RippleBehavior(item);
+        rb.destroy();
+      }
+    }
+  }
+
   void handleForClick(Event event) {
     if (element != null && forElement != null) {
       Rectangle rect = forElement.getBoundingClientRect();

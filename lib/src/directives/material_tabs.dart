@@ -28,16 +28,27 @@ class TabsBehavior {
           ..classes.addAll([TABS_RIPPLE_CONTAINER, RIPPLE_EFFECT])
           ..append(ripple);
         tab.append(rippleContainer);
-        tab.addEventListener('click', tabClickHandler);
         RippleBehavior rb = new RippleBehavior(tab);
         rb.init();
       }
+      tab.addEventListener('click', tabClickHandler);
     }
     element.classes.add(IS_UPGRADED);
   }
 
   List<Element> get tabs => element.querySelectorAll('.' + TAB_CLASS);
   List<Element> get panels => element.querySelectorAll('.' + PANEL_CLASS);
+
+  void destroy() {
+    bool rippling = element.classes.contains(RIPPLE_EFFECT);
+    for (Element tab in tabs) {
+      tab.removeEventListener('click', tabClickHandler);
+      if (rippling) {
+        RippleBehavior rb = new RippleBehavior(tab);
+        rb.destroy();
+      }
+    }
+  }
 
   void resetTabState() {
     for (Element k in tabs) {

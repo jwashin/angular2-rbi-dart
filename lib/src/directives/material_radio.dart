@@ -22,9 +22,10 @@ const String IS_UPGRADED = 'is-upgraded';
 class RadioBehavior {
   Element element;
   InputElement buttonElement;
-
+  SpanElement rippleContainer;
   RadioBehavior(this.element);
-  void init(){
+
+  void init() {
     buttonElement = element.querySelector('.' + RADIO_BTN);
 
     Element outerCircle = new SpanElement()..classes.add(RADIO_OUTER_CIRCLE);
@@ -37,7 +38,7 @@ class RadioBehavior {
       element.classes.add(RIPPLE_IGNORE_EVENTS);
       element.classes.remove(RIPPLE_EFFECT);
 
-      Element rippleContainer = new SpanElement()
+      rippleContainer = new SpanElement()
         ..classes
             .addAll([RADIO_RIPPLE_CONTAINER, RIPPLE_EFFECT, RIPPLE_CENTER]);
       rippleContainer.addEventListener('mouseup', onMouseup);
@@ -59,6 +60,19 @@ class RadioBehavior {
     });
   }
 
+  void destroy() {
+    buttonElement.removeEventListener('change', onChange);
+    buttonElement.removeEventListener('focus', onFocus);
+    buttonElement.removeEventListener('blur', onBlur);
+    buttonElement.removeEventListener('m-r-g-updated', onUpdated);
+    element.removeEventListener('mouseup', onMouseup);
+    if (rippleContainer != null) {
+      rippleContainer.removeEventListener('mouseup', onMouseup);
+      RippleBehavior rb = new RippleBehavior(rippleContainer);
+      rb.destroy();
+    }
+  }
+
   void onUpdated(Event event) {
     updateClasses();
   }
@@ -67,8 +81,8 @@ class RadioBehavior {
     List<Element> radios = document.querySelectorAll('.' + JS_RADIO);
     String name = buttonElement.getAttribute('name');
     for (Element radio in radios) {
-      Element button = radio
-          .querySelector("input[type='radio'][name='$name']." + RADIO_BTN);
+      Element button =
+      radio.querySelector("input[type='radio'][name='$name']." + RADIO_BTN);
       if (button != null) {
         button.dispatchEvent(new CustomEvent('m-r-g-updated'));
       }

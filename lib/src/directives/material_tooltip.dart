@@ -9,6 +9,20 @@ class TooltipBehavior {
 
   TooltipBehavior(this.element);
   void init() {
+    Element target = forElement;
+    if (target != null) {
+      if (!target.attributes.containsKey('tabindex')) {
+        target.setAttribute('tabindex', '0');
+      }
+      target.addEventListener('mouseenter', handleMouseEnter, false);
+      target.addEventListener('click', handleMouseEnter, false);
+      target.addEventListener('touchstart', handleMouseEnter, false);
+      target.addEventListener('blur', handleMouseLeave);
+      target.addEventListener('mouseleave', handleMouseLeave);
+    }
+  }
+
+  Element get forElement {
     Element forElement;
     String forElementId = element.getAttribute('for');
     if (forElementId == null) {
@@ -16,16 +30,18 @@ class TooltipBehavior {
     }
     if (forElementId != null) {
       forElement = document.getElementById(forElementId);
-      if (forElement != null) {
-        if (!forElement.attributes.containsKey('tabindex')) {
-          forElement.setAttribute('tabindex', '0');
-        }
-        forElement.addEventListener('mouseenter', handleMouseEnter, false);
-        forElement.addEventListener('click', handleMouseEnter, false);
-        forElement.addEventListener('touchstart', handleMouseEnter, false);
-        forElement.addEventListener('blur', handleMouseLeave);
-        forElement.addEventListener('mouseleave', handleMouseLeave);
-      }
+    }
+    return forElement;
+  }
+
+  void destroy() {
+    Element target = forElement;
+    if (target != null) {
+      target.removeEventListener('mouseenter', handleMouseEnter, false);
+      target.removeEventListener('click', handleMouseEnter, false);
+      target.removeEventListener('touchstart', handleMouseEnter, false);
+      target.removeEventListener('blur', handleMouseLeave);
+      target.removeEventListener('mouseleave', handleMouseLeave);
     }
   }
 

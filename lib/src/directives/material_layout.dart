@@ -191,11 +191,9 @@ class LayoutBehavior {
 
       if (tabBar.classes.contains(RIPPLE_EFFECT)) {
         tabBar.classes.add(RIPPLE_IGNORE_EVENTS);
-      }
+        for (Element tab in tabs) {
+          //new MaterialLayoutTab(tab, tabs, panels, this);
 
-      for (Element tab in tabs) {
-        //new MaterialLayoutTab(tab, tabs, panels, this);
-        if (tabBar.classes.contains(RIPPLE_EFFECT)) {
           SpanElement rippleContainer = new SpanElement();
           rippleContainer.classes.add(TAB_RIPPLE_CONTAINER);
           rippleContainer.classes.add(RIPPLE_EFFECT);
@@ -205,11 +203,48 @@ class LayoutBehavior {
           tab.append(rippleContainer);
           RippleBehavior rb = new RippleBehavior(tab);
           rb.init();
+
+          tab.addEventListener('click', tabClickHandler);
         }
-        tab.addEventListener('click', tabClickHandler);
       }
     }
     elem.classes.add(IS_UPGRADED);
+  }
+
+  void destroy() {
+    if (header != null) {
+      if (header.classes.contains(HEADER_WATERFALL)) {
+        header.removeEventListener('transitionend', headerTransitionEndHandler);
+        header.removeEventListener('click', headerClickHandler);
+        if (content != null) {
+          content.removeEventListener('scroll', contentScrollHandler);
+        }
+      }
+    }
+    if (drawer != null) {
+      Element drawerButton = elem.querySelector('.$DRAWER_BTN');
+      if (drawerButton != null) {
+        drawerButton.removeEventListener('click', drawerToggleHandler);
+      }
+    }
+    if (obfuscator != null) {
+      obfuscator.removeEventListener('click', drawerToggleHandler);
+    }
+    if (leftButton != null) {
+      leftButton.removeEventListener('click', leftButtonClickHandler);
+    }
+    if (rightButton != null) {
+      rightButton.removeEventListener('click', rightButtonClickHandler);
+    }
+    if (tabBar != null) {
+      tabBar.removeEventListener('scroll', tabScrollHandler);
+      if (tabBar.classes.contains(RIPPLE_EFFECT)) {
+        for (Element tab in tabs) {
+          RippleBehavior rb = new RippleBehavior(tab);
+          rb.destroy();
+        }
+      }
+    }
   }
 
   List<Element> get tabs => tabBar.querySelectorAll('.' + TAB);
