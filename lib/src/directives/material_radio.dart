@@ -69,7 +69,9 @@ class RadioBehavior {
     for (Element radio in radios) {
       Element button = radio
           .querySelector("input[type='radio'][name='$name']." + RADIO_BTN);
-      button.dispatchEvent(new CustomEvent('m-r-g-updated'));
+      if (button != null) {
+        button.dispatchEvent(new CustomEvent('m-r-g-updated'));
+      }
     }
   }
 
