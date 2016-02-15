@@ -36,3 +36,6 @@
 - Material Radio : don't dispatch event to null
 - remove event listeners OnDestroy
 
+## 0.0.9
+
+- initialize Map in data table
