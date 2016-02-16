@@ -24,13 +24,12 @@ import 'dart:collection';
 const String SNACKBAR = 'mdl-snackbar';
 const String MESSAGE = 'mdl-snackbar__text';
 const String ACTION = 'mdl-snackbar__action';
-const String ACTIVE = 'is-active';
+const String ACTIVE = 'mdl-snackbar--active';
+
+const int ANIMATION_LENGTH = 250;
 
 class SnackbarBehavior {
   Element element;
-  Element actionElement;
-  Element textElement;
-  Element snackbarElement;
   bool active = false;
   int timeout;
   Queue<Map> queuedNotifications = new Queue();
@@ -38,84 +37,84 @@ class SnackbarBehavior {
   String message;
   String actionText;
 
-
   SnackbarBehavior(this.element);
-  void init(){
-    setDefaults();
+
+  void init() {
+    setActionHidden(true);
+  }
+
+  Element get textElement => element.querySelector('.' + MESSAGE);
+
+  Element get actionElement => element.querySelector('.' + ACTION);
+
+  void setActionHidden(bool aValue) {
+    if (aValue) {
+      actionElement.setAttribute('aria-hidden', 'true');
+    } else {
+      if (actionElement.attributes.keys.contains('aria-hidden')) {
+        actionElement.attributes.remove('aria-hidden');
+      }
+    }
+  }
+
+  void _displaySnackBar() {
+    /// private; called by showSnackbar
+
+    element.setAttribute('aria-hidden', 'true');
+
+    if (actionHandler != null && actionElement != null) {
+      actionElement.text = actionText;
+      actionElement.addEventListener('click', actionHandler);
+      setActionHidden(false);
+    }
+    textElement.text = message;
+    element.classes.add(ACTIVE);
+    element.setAttribute('aria-hidden', 'false');
+    new Timer(new Duration(milliseconds: timeout), cleanup);
   }
 
   void showSnackbar(Map data) {
     if (active) {
       queuedNotifications.addLast(data);
+      return;
+    }
+    message = data['message'];
+    if (data.containsKey('timeout')) {
+      timeout = data['timeout'];
     } else {
-      active = true;
-      message = data['message'];
-      if (data['timeout'] != null) {
-        timeout = data['timeout'];
-      } else {
-        timeout = 8000;
-      }
-      if (data['actionHandler'] != null) {
-        actionHandler = data['actionHandler'];
-      }
-      if (data['actionText'] != null) {
-        actionText = data['actionText'];
-      }
-      createSnackbar();
+      timeout = 2750;
     }
-  }
-
-  void removeSnackbar() {
-    if (actionElement != null && actionElement.parent != null) {
-      actionElement.parent.children.remove(actionElement);
+    if (data.containsKey('actionHandler') && data.containsKey('actionText')) {
+      actionHandler = data['actionHandler'];
+      actionText = data['actionText'];
     }
-    textElement.parent.children.remove(textElement);
-    snackbarElement.parent.children.remove(snackbarElement);
-  }
-
-  void createSnackbar() {
-    textElement = new DivElement()..classes.add(MESSAGE);
-    snackbarElement = new DivElement()
-      ..classes.add(SNACKBAR)
-      ..append(textElement)
-      ..setAttribute('aria-hidden', 'true');
-    if (actionHandler != null) {
-      actionElement = new ButtonElement()
-        ..type = 'button'
-        ..classes.add(ACTION)
-        ..text = actionText
-        ..addEventListener('click', actionHandler);
-      snackbarElement.append(actionElement);
-    }
-    element.append(snackbarElement);
-    textElement.text = message;
-    snackbarElement.classes.add(ACTIVE);
-    snackbarElement.setAttribute('aria-hidden', 'false');
-    new Timer(new Duration(milliseconds: timeout), cleanup);
-  }
-
-  void cleanup() {
-    snackbarElement.classes.remove(ACTIVE);
-    snackbarElement.setAttribute('aria-hidden', 'true');
-    if (actionElement != null) {
-      actionElement.removeEventListener('click', actionHandler);
-    }
-    setDefaults();
-    active = false;
-    removeSnackbar();
-    checkQueue();
+    _displaySnackBar();
   }
 
   void checkQueue() {
     if (queuedNotifications.length > 0) {
-      Map item = queuedNotifications.removeFirst();
-      showSnackbar(item);
+      showSnackbar(queuedNotifications.removeFirst());
     }
   }
 
-  void setDefaults() {
-    actionHandler = null;
-    message = null;
-    actionText = null;
+  void cleanup() {
+    element.classes.remove(ACTIVE);
+    new Timer(new Duration(milliseconds: ANIMATION_LENGTH), () {
+      element.setAttribute('aria-hidden', 'true');
+      textElement.text = '';
+      if (actionElement != null) {
+        Element ae = actionElement;
+        if (!ae.attributes.keys.contains('aria-hidden')) {
+          setActionHidden(true);
+          ae.text = '';
+          ae.removeEventListener('click', actionHandler);
+        }
+      }
+      actionHandler = null;
+      message = null;
+      actionText = null;
+      active = false;
+      checkQueue();
+    });
   }
 }
