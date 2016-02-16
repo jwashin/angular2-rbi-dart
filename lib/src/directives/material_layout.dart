@@ -2,6 +2,7 @@ library material_layout;
 
 import 'dart:html';
 import 'material_ripple.dart' show RippleBehavior;
+import 'dart:async';
 
 const String CONTAINER = 'mdl-layout__container';
 const String HEADER = 'mdl-layout__header';
@@ -46,6 +47,7 @@ const String ON_SMALL_SCREEN = 'mdl-layout--small-screen-only';
 
 const String MAX_WIDTH = '(max-width: 1024px)';
 const int TAB_SCROLL_PIXELS = 100;
+const int RESIZE_TIMEOUT = 100;
 
 const String MENU_ICON = 'menu';
 const String CHEVRON_LEFT = 'chevron_left';
@@ -65,6 +67,7 @@ class LayoutBehavior {
   Element leftButton;
   Element rightButton;
   DivElement obfuscator;
+  bool mayUpdateTabsOnResize = true;
   MediaQueryList screenSizeMediaQuery;
 
   LayoutBehavior(this.elem);
@@ -186,8 +189,9 @@ class LayoutBehavior {
       tabContainer.append(tabBar);
       tabContainer.append(rightButton);
 
-      tabBar.addEventListener('scroll', tabScrollHandler);
-      tabScrollHandler(null);
+      tabBar.addEventListener('scroll', tabUpdatelHandler);
+      tabUpdatelHandler(null);
+      window.addEventListener('resize', windowResizeHandler);
 
       if (tabBar.classes.contains(RIPPLE_EFFECT)) {
         tabBar.classes.add(RIPPLE_IGNORE_EVENTS);
@@ -237,7 +241,8 @@ class LayoutBehavior {
       rightButton.removeEventListener('click', rightButtonClickHandler);
     }
     if (tabBar != null) {
-      tabBar.removeEventListener('scroll', tabScrollHandler);
+      tabBar.removeEventListener('scroll', tabUpdatelHandler);
+      window.removeEventListener('resize', windowResizeHandler);
       if (tabBar.classes.contains(RIPPLE_EFFECT)) {
         for (Element tab in tabs) {
           RippleBehavior rb = new RippleBehavior(tab);
@@ -270,7 +275,7 @@ class LayoutBehavior {
     tabBar.scrollLeft -= TAB_SCROLL_PIXELS;
   }
 
-  void tabScrollHandler(Event event) {
+  void tabUpdatelHandler(Event event) {
     if (tabBar.scrollLeft > 0) {
       leftButton.classes.add(IS_ACTIVE);
     } else {
@@ -280,6 +285,16 @@ class LayoutBehavior {
       rightButton.classes.add(IS_ACTIVE);
     } else {
       rightButton.classes.remove(IS_ACTIVE);
+    }
+  }
+
+  void windowResizeHandler(Event event) {
+    if (mayUpdateTabsOnResize) {
+      mayUpdateTabsOnResize = false;
+      new Timer(new Duration(milliseconds: RESIZE_TIMEOUT), () {
+        tabUpdatelHandler(null);
+        mayUpdateTabsOnResize = true;
+      });
     }
   }
 
