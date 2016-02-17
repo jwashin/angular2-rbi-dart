@@ -218,10 +218,18 @@ class MaterialTooltip extends TooltipBehavior implements OnInit, OnDestroy {
 }
 
 @Directive(selector: '.mdl-js-snackbar')
-class MaterialSnackbar extends SnackbarBehavior implements OnInit {
+class MaterialSnackbar extends SnackbarBehavior implements OnInit, OnChanges {
   MaterialSnackbar(ElementRef ref) : super(ref.nativeElement);
+  @Input('data') Map data;
   void ngOnInit() {
     init();
+  }
+
+  void ngOnChanges(Map<String, SimpleChange> changeRecord) {
+    if (changeRecord.keys.contains('data')) {
+      Map newData = changeRecord['data'].currentValue;
+      showSnackbar(newData);
+    }
   }
 }
 

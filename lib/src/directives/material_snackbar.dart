@@ -37,22 +37,25 @@ class SnackbarBehavior {
   String message;
   String actionText;
 
+  Element get textElement => element.querySelector('.' + MESSAGE);
+
+  Element get actionElement => element.querySelector('.' + ACTION);
+
   SnackbarBehavior(this.element);
 
   void init() {
     setActionHidden(true);
   }
 
-  Element get textElement => element.querySelector('.' + MESSAGE);
-
-  Element get actionElement => element.querySelector('.' + ACTION);
-
   void setActionHidden(bool aValue) {
-    if (aValue) {
-      actionElement.setAttribute('aria-hidden', 'true');
-    } else {
-      if (actionElement.attributes.keys.contains('aria-hidden')) {
-        actionElement.attributes.remove('aria-hidden');
+    Element _actionElement = actionElement;
+    if (_actionElement != null) {
+      if (aValue) {
+        _actionElement.setAttribute('aria-hidden', 'true');
+      } else {
+        if (_actionElement.attributes.keys.contains('aria-hidden')) {
+          _actionElement.attributes.remove('aria-hidden');
+        }
       }
     }
   }
@@ -61,10 +64,11 @@ class SnackbarBehavior {
     /// private; called by showSnackbar
 
     element.setAttribute('aria-hidden', 'true');
-
-    if (actionHandler != null && actionElement != null) {
-      actionElement.text = actionText;
-      actionElement.addEventListener('click', actionHandler);
+    Function _actionHandler = actionHandler;
+    Element _actionElement = actionElement;
+    if (_actionHandler != null && _actionElement != null) {
+      _actionElement.text = actionText;
+      _actionElement.addEventListener('click', actionHandler);
       setActionHidden(false);
     }
     textElement.text = message;
@@ -74,21 +78,24 @@ class SnackbarBehavior {
   }
 
   void showSnackbar(Map data) {
-    if (active) {
-      queuedNotifications.addLast(data);
-      return;
+    if (data != null) {
+      if (active) {
+        queuedNotifications.addLast(data);
+        return;
+      }
+      active = true;
+      message = data['message'];
+      if (data.containsKey('timeout')) {
+        timeout = data['timeout'];
+      } else {
+        timeout = 2750;
+      }
+      if (data.containsKey('actionHandler') && data.containsKey('actionText')) {
+        actionHandler = data['actionHandler'];
+        actionText = data['actionText'];
+      }
+      _displaySnackBar();
     }
-    message = data['message'];
-    if (data.containsKey('timeout')) {
-      timeout = data['timeout'];
-    } else {
-      timeout = 2750;
-    }
-    if (data.containsKey('actionHandler') && data.containsKey('actionText')) {
-      actionHandler = data['actionHandler'];
-      actionText = data['actionText'];
-    }
-    _displaySnackBar();
   }
 
   void checkQueue() {
@@ -103,11 +110,11 @@ class SnackbarBehavior {
       element.setAttribute('aria-hidden', 'true');
       textElement.text = '';
       if (actionElement != null) {
-        Element ae = actionElement;
-        if (!ae.attributes.keys.contains('aria-hidden')) {
+        Element _actionElement = actionElement;
+        if (!_actionElement.attributes.keys.contains('aria-hidden')) {
           setActionHidden(true);
-          ae.text = '';
-          ae.removeEventListener('click', actionHandler);
+          _actionElement.text = '';
+          _actionElement.removeEventListener('click', actionHandler);
         }
       }
       actionHandler = null;
