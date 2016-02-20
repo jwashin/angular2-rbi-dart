@@ -18,6 +18,7 @@ class TextfieldBehavior {
   Element element;
   int maxRows = NO_MAX_ROWS;
   Element input;
+  List<StreamSubscription> subscriptions = [];
 
   TextfieldBehavior(this.element);
   void init() {
@@ -30,13 +31,13 @@ class TextfieldBehavior {
           maxRows = NO_MAX_ROWS;
         }
       }
-      input.addEventListener('input', onInput);
-      input.addEventListener('focus', onFocus);
-      input.addEventListener('blur', onBlur);
-      input.addEventListener('reset', onReset);
+      subscriptions..add(input.onInput.listen((event) => onInput(event)))..add(
+          input.onFocus.listen((event) => onFocus(event)))..add(
+          input.onBlur.listen((event) => onBlur(event)))..add(
+          input.onReset.listen((event) => onReset(event)));
 
       if (maxRows != NO_MAX_ROWS) {
-        input.addEventListener('keydown', onKeyDown);
+        subscriptions.add(input.onKeyDown.listen((event) => onKeyDown(event)));
       }
 
       //wait a click for angular2 to init the value
@@ -48,13 +49,10 @@ class TextfieldBehavior {
   }
 
   void destroy() {
-    input.removeEventListener('input', onInput);
-    input.removeEventListener('focus', onFocus);
-    input.removeEventListener('blur', onBlur);
-    input.removeEventListener('reset', onReset);
-    if (maxRows != NO_MAX_ROWS) {
-      input.removeEventListener('keydown', onKeyDown);
+    for (StreamSubscription subscription in subscriptions) {
+      subscription.cancel();
     }
+    subscriptions.clear();
   }
 
   void onKeyDown(KeyboardEvent event) {

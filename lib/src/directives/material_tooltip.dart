@@ -1,11 +1,13 @@
 library material_tooltip;
 
 import 'dart:html';
+import 'dart:async';
 
 const String IS_ACTIVE = 'is-active';
 
 class TooltipBehavior {
   Element element;
+  List<StreamSubscription> subscriptions = [];
 
   TooltipBehavior(this.element);
   void init() {
@@ -14,11 +16,18 @@ class TooltipBehavior {
       if (!target.attributes.containsKey('tabindex')) {
         target.setAttribute('tabindex', '0');
       }
-      target.addEventListener('mouseenter', handleMouseEnter, false);
-      target.addEventListener('click', handleMouseEnter, false);
-      target.addEventListener('touchstart', handleMouseEnter, false);
-      target.addEventListener('blur', handleMouseLeave);
-      target.addEventListener('mouseleave', handleMouseLeave);
+//      target.addEventListener('mouseenter', handleMouseEnter, false);
+//      target.addEventListener('click', handleMouseEnter, false);
+//      target.addEventListener('touchstart', handleMouseEnter, false);
+//      target.addEventListener('blur', handleMouseLeave);
+//      target.addEventListener('mouseleave', handleMouseLeave);
+
+      subscriptions..add(
+          target.onMouseEnter.listen((event) => handleMouseEnter(event)))..add(
+          target.onClick.listen((event) => handleMouseEnter(event)))..add(
+          target.onTouchStart.listen((event) => handleMouseEnter(event)))..add(
+          target.onBlur.listen((event) => handleMouseLeave(event)))..add(
+          target.onMouseLeave.listen((event) => handleMouseLeave(event)));
     }
   }
 
@@ -35,14 +44,10 @@ class TooltipBehavior {
   }
 
   void destroy() {
-    Element target = forElement;
-    if (target != null) {
-      target.removeEventListener('mouseenter', handleMouseEnter, false);
-      target.removeEventListener('click', handleMouseEnter, false);
-      target.removeEventListener('touchstart', handleMouseEnter, false);
-      target.removeEventListener('blur', handleMouseLeave);
-      target.removeEventListener('mouseleave', handleMouseLeave);
+    for (StreamSubscription subscription in subscriptions) {
+      subscription.cancel();
     }
+    subscriptions.clear();
   }
 
   void handleMouseEnter(Event event) {
