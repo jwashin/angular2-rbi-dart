@@ -18,7 +18,8 @@ const String IS_UPGRADED = 'is-upgraded';
 class IconToggleBehavior {
   Element element;
   InputElement inputElement;
-  SpanElement rippleContainer;
+  List<StreamSubscription> subscriptions = [];
+  List<RippleBehavior> ripples = [];
 
   IconToggleBehavior(this.element);
 
@@ -27,20 +28,23 @@ class IconToggleBehavior {
 
     if (element.classes.contains(RIPPLE_EFFECT)) {
       element.classes.add(RIPPLE_IGNORE_EVENTS);
-      rippleContainer = new SpanElement()
+      SpanElement rippleContainer = new SpanElement()
         ..classes.addAll(
             [ICON_TOGGLE_RIPPLE_CONTAINER, RIPPLE_EFFECT, RIPPLE_CENTER]);
-      rippleContainer.addEventListener('mouseup', onMouseUp);
+      subscriptions
+          .add(rippleContainer.onMouseUp.listen((event) => onMouseUp(event)));
       Element ripple = new SpanElement()..classes.add(RIPPLE);
       rippleContainer.append(ripple);
       element.append(rippleContainer);
-      RippleBehavior rb = new RippleBehavior(rippleContainer);
-      rb.init();
+      ripples.add(new RippleBehavior(rippleContainer)
+        ..init());
     }
-    inputElement.addEventListener('change', onChange);
-    inputElement.addEventListener('focus', onFocus);
-    inputElement.addEventListener('blur', onBlur);
-    inputElement.addEventListener('mouseup', onMouseUp);
+    subscriptions..add(
+        inputElement.onChange.listen((event) => onChange(event)))..add(
+        inputElement.onFocus.listen((event) => onFocus(event)))..add(
+        inputElement.onBlur.listen((event) => onBlur(event)))..add(
+        inputElement.onMouseUp.listen((event) => onMouseUp(event)));
+
     // wait a click for Angular to set values
     Timer.run(() {
       updateClasses();
@@ -49,34 +53,23 @@ class IconToggleBehavior {
   }
 
   void destroy() {
-    inputElement.removeEventListener('change', onChange);
-    inputElement.removeEventListener('focus', onFocus);
-    inputElement.removeEventListener('blur', onBlur);
-    inputElement.removeEventListener('mouseup', onMouseUp);
-    if (element.classes.contains(RIPPLE_EFFECT)) {
-      rippleContainer.removeEventListener('mouseup', onMouseUp);
-      RippleBehavior rb = new RippleBehavior(rippleContainer);
-      rb.destroy();
+    for (StreamSubscription subscription in subscriptions) {
+      subscription.cancel();
     }
+    subscriptions.clear();
+    for (RippleBehavior ripple in ripples) {
+      ripple.destroy();
+    }
+    ripples.clear();
   }
 
-  void onMouseUp(Event event) {
-    blur();
-  }
+  void onMouseUp(Event event) => blur();
 
-  void onFocus(Event event) {
-    element.classes.add(IS_FOCUSED);
-  }
+  bool onFocus(Event event) => element.classes.add(IS_FOCUSED);
 
-  void onBlur(Event event) {
-    element.classes.remove(IS_FOCUSED);
-  }
+  bool onBlur(Event event) => element.classes.remove(IS_FOCUSED);
 
-  void blur() {
-    Timer.run(() {
-      inputElement.blur();
-    });
-  }
+  void blur() => Timer.run(() => inputElement.blur());
 
   void updateClasses() {
     checkDisabled();
@@ -99,23 +92,13 @@ class IconToggleBehavior {
     }
   }
 
-  void onChange(Event event) {
-    updateClasses();
-  }
+  void onChange(Event event) => updateClasses();
 
-  void disable() {
-    inputElement.disabled = true;
-  }
+  bool disable() => inputElement.disabled = true;
 
-  void enable() {
-    inputElement.disabled = false;
-  }
+  bool enable() => inputElement.disabled = false;
 
-  void check() {
-    inputElement.checked = true;
-  }
+  bool check() => inputElement.checked = true;
 
-  void uncheck() {
-    inputElement.checked = false;
-  }
+  bool uncheck() => inputElement.checked = false;
 }

@@ -2,7 +2,7 @@ library material_switch;
 
 import 'material_ripple.dart' show RippleBehavior;
 import 'dart:html';
-import 'dart:async' show Timer;
+import 'dart:async';
 
 const String SWITCH_INPUT = 'mdl-switch__input';
 const String TRACK = 'mdl-switch__track';
@@ -21,7 +21,8 @@ const String IS_UPGRADED = 'is-upgraded';
 class SwitchBehavior {
   Element element;
   CheckboxInputElement inputElement;
-  SpanElement rippleContainer;
+  List<StreamSubscription> subscriptions = [];
+  List<RippleBehavior> ripples = [];
 
   SwitchBehavior(this.element);
   void init() {
@@ -33,20 +34,24 @@ class SwitchBehavior {
     element.children.addAll([track, thumb]);
     if (element.classes.contains(RIPPLE_EFFECT)) {
       element.classes.add(RIPPLE_IGNORE_EVENTS);
-      rippleContainer = new SpanElement()
+      SpanElement rippleContainer = new SpanElement()
         ..classes
-            .addAll([SWITCH_RIPPLE_CONTAINER, RIPPLE_EFFECT, RIPPLE_CENTER])
-        ..addEventListener('mouseup', onMouseUp);
+            .addAll([SWITCH_RIPPLE_CONTAINER, RIPPLE_EFFECT, RIPPLE_CENTER]);
+      subscriptions
+          .add(rippleContainer.onMouseUp.listen((event) => onMouseUp(event)));
+
       Element ripple = new SpanElement()..classes.add(RIPPLE);
       rippleContainer.append(ripple);
       element.append(rippleContainer);
-      RippleBehavior rb = new RippleBehavior(rippleContainer);
-      rb.init();
+      ripples.add(new RippleBehavior(rippleContainer)
+        ..init());
     }
-    inputElement.addEventListener('change', onChange);
-    inputElement.addEventListener('focus', onFocus);
-    inputElement.addEventListener('blur', onBlur);
-    element.addEventListener('mouseup', onMouseUp);
+    subscriptions..add(
+        inputElement.onChange.listen((event) => onChange(event)))..add(
+        inputElement.onFocus.listen((event) => onFocus(event)))..add(
+        inputElement.onBlur.listen((event) => onBlur(event)))..add(
+        element.onMouseUp.listen((event) => onMouseUp(event)));
+
     // wait a click for angular2
     Timer.run(() {
       updateClasses();
@@ -55,14 +60,14 @@ class SwitchBehavior {
   }
 
   void destroy() {
-    inputElement.removeEventListener('change', onChange);
-    inputElement.removeEventListener('focus', onFocus);
-    inputElement.removeEventListener('blur', onBlur);
-    element.removeEventListener('mouseup', onMouseUp);
-    if (element.classes.contains(RIPPLE_EFFECT)) {
-      RippleBehavior rb = new RippleBehavior(rippleContainer);
-      rb.destroy();
+    for (StreamSubscription subscription in subscriptions) {
+      subscription.cancel();
     }
+    subscriptions.clear();
+    for (RippleBehavior ripple in ripples) {
+      ripple.destroy();
+    }
+    ripples.clear();
   }
 
   void onChange(Event event) {

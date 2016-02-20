@@ -69,6 +69,8 @@ class LayoutBehavior {
   DivElement obfuscator;
   bool mayUpdateTabsOnResize = true;
   MediaQueryList screenSizeMediaQuery;
+  List<StreamSubscription> subscriptions = [];
+  List<RippleBehavior> ripples = [];
 
   LayoutBehavior(this.elem);
 
@@ -101,8 +103,9 @@ class LayoutBehavior {
         mode = SEAMED;
       } else if (header.classes.contains(HEADER_WATERFALL)) {
         mode = WATERFALL;
-        header.addEventListener('transitionend', headerTransitionEndHandler);
-        header.addEventListener('click', headerClickHandler);
+        subscriptions..add(header.onTransitionEnd
+            .listen((event) => headerTransitionEndHandler(event)))..add(
+            header.onClick.listen((event) => headerClickHandler(event)));
       } else if (header.classes.contains(HEADER_SCROLL)) {
         mode = SCROLL;
         container.classes.add(HAS_SCROLLING_HEADER);
@@ -119,7 +122,8 @@ class LayoutBehavior {
           tabBar.classes.remove(CASTING_SHADOW);
         }
       } else if (mode == WATERFALL) {
-        content.addEventListener('scroll', contentScrollHandler);
+        subscriptions.add(
+            content.onScroll.listen((event) => contentScrollHandler(event)));
         contentScrollHandler(null);
       }
     }
@@ -140,7 +144,9 @@ class LayoutBehavior {
       } else if (drawer.classes.contains(ON_SMALL_SCREEN)) {
         drawerButton.classes.add(ON_SMALL_SCREEN);
       }
-      drawerButton.addEventListener('click', drawerToggleHandler);
+
+      subscriptions.add(
+          drawerButton.onClick.listen((event) => drawerToggleHandler(event)));
 
       elem.classes.add(HAS_DRAWER);
       if (elem.classes.contains(FIXED_HEADER)) {
@@ -149,8 +155,9 @@ class LayoutBehavior {
         elem.insertBefore(drawerButton, content);
       }
       obfuscator = new DivElement()
-        ..classes.add(OBFUSCATOR)
-        ..addEventListener('click', drawerToggleHandler);
+        ..classes.add(OBFUSCATOR);
+      subscriptions.add(
+          obfuscator.onClick.listen((event) => drawerToggleHandler(event)));
       elem.append(obfuscator);
     }
 
@@ -172,8 +179,9 @@ class LayoutBehavior {
       leftButton = new DivElement()
         ..classes.add(TAB_BAR_BUTTON)
         ..classes.add(TAB_BAR_LEFT_BUTTON)
-        ..addEventListener('click', leftButtonClickHandler)
         ..append(leftButtonIcon);
+      subscriptions.add(
+          leftButton.onClick.listen((event) => leftButtonClickHandler(event)));
 
       Element rightButtonIcon = new Element.tag('i')
         ..classes.add(ICON)
@@ -182,16 +190,18 @@ class LayoutBehavior {
       rightButton = new DivElement()
         ..classes.add(TAB_BAR_BUTTON)
         ..classes.add(TAB_BAR_RIGHT_BUTTON)
-        ..addEventListener('click', rightButtonClickHandler)
         ..append(rightButtonIcon);
+      subscriptions.add(rightButton.onClick
+          .listen((event) => rightButtonClickHandler(event)));
 
       tabContainer.append(leftButton);
       tabContainer.append(tabBar);
       tabContainer.append(rightButton);
-
-      tabBar.addEventListener('scroll', tabUpdatelHandler);
+      subscriptions
+          .add(tabBar.onScroll.listen((event) => tabUpdatelHandler(event)));
       tabUpdatelHandler(null);
-      window.addEventListener('resize', windowResizeHandler);
+      subscriptions
+          .add(window.onResize.listen((event) => windowResizeHandler(event)));
 
       if (tabBar.classes.contains(RIPPLE_EFFECT)) {
         tabBar.classes.add(RIPPLE_IGNORE_EVENTS);
@@ -205,10 +215,10 @@ class LayoutBehavior {
           ripple.classes.add(RIPPLE);
           rippleContainer.append(ripple);
           tab.append(rippleContainer);
-          RippleBehavior rb = new RippleBehavior(tab);
-          rb.init();
-
-          tab.addEventListener('click', tabClickHandler);
+          ripples.add(new RippleBehavior(tab)
+            ..init());
+          subscriptions
+              .add(tab.onClick.listen((event) => tabClickHandler(event)));
         }
       }
     }
@@ -216,40 +226,14 @@ class LayoutBehavior {
   }
 
   void destroy() {
-    if (header != null) {
-      if (header.classes.contains(HEADER_WATERFALL)) {
-        header.removeEventListener('transitionend', headerTransitionEndHandler);
-        header.removeEventListener('click', headerClickHandler);
-        if (content != null) {
-          content.removeEventListener('scroll', contentScrollHandler);
-        }
-      }
+    for (StreamSubscription subscription in subscriptions) {
+      subscription.cancel();
     }
-    if (drawer != null) {
-      Element drawerButton = elem.querySelector('.$DRAWER_BTN');
-      if (drawerButton != null) {
-        drawerButton.removeEventListener('click', drawerToggleHandler);
-      }
+    subscriptions.clear();
+    for (RippleBehavior ripple in ripples) {
+      ripple.destroy();
     }
-    if (obfuscator != null) {
-      obfuscator.removeEventListener('click', drawerToggleHandler);
-    }
-    if (leftButton != null) {
-      leftButton.removeEventListener('click', leftButtonClickHandler);
-    }
-    if (rightButton != null) {
-      rightButton.removeEventListener('click', rightButtonClickHandler);
-    }
-    if (tabBar != null) {
-      tabBar.removeEventListener('scroll', tabUpdatelHandler);
-      window.removeEventListener('resize', windowResizeHandler);
-      if (tabBar.classes.contains(RIPPLE_EFFECT)) {
-        for (Element tab in tabs) {
-          RippleBehavior rb = new RippleBehavior(tab);
-          rb.destroy();
-        }
-      }
-    }
+    ripples.clear();
   }
 
   List<Element> get tabs => tabBar.querySelectorAll('.' + TAB);

@@ -1,6 +1,7 @@
 library material_tabs;
 
 import 'dart:html';
+import 'dart:async';
 import 'material_ripple.dart' show RippleBehavior;
 
 const String TAB_CLASS = 'mdl-tabs__tab';
@@ -15,6 +16,8 @@ const String RIPPLE_IGNORE_EVENTS = 'mdl-js-ripple-effect--ignore-events';
 
 class TabsBehavior {
   Element element;
+  List<StreamSubscription> subscriptions = [];
+  List<RippleBehavior> ripples = [];
 
   TabsBehavior(this.element);
   void init() {
@@ -28,10 +31,10 @@ class TabsBehavior {
           ..classes.addAll([TABS_RIPPLE_CONTAINER, RIPPLE_EFFECT])
           ..append(ripple);
         tab.append(rippleContainer);
-        RippleBehavior rb = new RippleBehavior(tab);
-        rb.init();
+        ripples.add(new RippleBehavior(tab)
+          ..init());
       }
-      tab.addEventListener('click', tabClickHandler);
+      subscriptions.add(tab.onClick.listen((event) => tabClickHandler(event)));
     }
     element.classes.add(IS_UPGRADED);
   }
@@ -40,14 +43,14 @@ class TabsBehavior {
   List<Element> get panels => element.querySelectorAll('.' + PANEL_CLASS);
 
   void destroy() {
-    bool rippling = element.classes.contains(RIPPLE_EFFECT);
-    for (Element tab in tabs) {
-      tab.removeEventListener('click', tabClickHandler);
-      if (rippling) {
-        RippleBehavior rb = new RippleBehavior(tab);
-        rb.destroy();
-      }
+    for (StreamSubscription subscription in subscriptions) {
+      subscription.cancel();
     }
+    subscriptions.clear();
+    for (RippleBehavior ripple in ripples) {
+      ripple.destroy();
+    }
+    ripples.clear();
   }
 
   void resetTabState() {

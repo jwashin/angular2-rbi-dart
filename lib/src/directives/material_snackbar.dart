@@ -36,6 +36,7 @@ class SnackbarBehavior {
   Function actionHandler;
   String message;
   String actionText;
+  StreamSubscription actionSubscription;
 
   Element get textElement => element.querySelector('.' + MESSAGE);
 
@@ -68,7 +69,8 @@ class SnackbarBehavior {
     Element _actionElement = actionElement;
     if (_actionHandler != null && _actionElement != null) {
       _actionElement.text = actionText;
-      _actionElement.addEventListener('click', actionHandler);
+      actionSubscription =
+          _actionElement.onClick.listen((event) => actionHandler(event));
       setActionHidden(false);
     }
     textElement.text = message;
@@ -114,7 +116,7 @@ class SnackbarBehavior {
         if (!_actionElement.attributes.keys.contains('aria-hidden')) {
           setActionHidden(true);
           _actionElement.text = '';
-          _actionElement.removeEventListener('click', actionHandler);
+          actionSubscription.cancel();
         }
       }
       actionHandler = null;

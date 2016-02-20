@@ -2,6 +2,7 @@ library material_data_table;
 
 import 'dart:html';
 import 'material_checkbox.dart' show CheckboxBehavior;
+import 'dart:async';
 
 const String DATA_TABLE = 'mdl-data-table';
 const String SELECTABLE = 'mdl-data-table--selectable';
@@ -16,7 +17,8 @@ const String CHECKBOX_INPUT = 'mdl-checkbox__input';
 
 class DataTableBehavior {
   Element element;
-  Map<CheckboxInputElement, Function> changeListeners = {};
+  List<StreamSubscription> subscriptions = [];
+  List<CheckboxBehavior> checkboxes = [];
 
   DataTableBehavior(this.element);
   void init() {
@@ -46,18 +48,14 @@ class DataTableBehavior {
   }
 
   void destroy() {
-    if (element.classes.contains(SELECTABLE)) {
-      List<Element> checkboxLabels =
-      element.querySelectorAll('label[$DATA_TABLE_SELECT]');
-      for (LabelElement label in checkboxLabels) {
-        CheckboxBehavior cb = new CheckboxBehavior(label);
-        cb.destroy();
-      }
-      for (CheckboxInputElement checkbox in changeListeners.keys) {
-        checkbox.removeEventListener('change', changeListeners[checkbox]);
-      }
-      changeListeners.clear();
+    for (CheckboxBehavior checkbox in checkboxes) {
+      checkbox.destroy();
     }
+    checkboxes.clear();
+    for (StreamSubscription subscription in subscriptions) {
+      subscription.cancel();
+    }
+    subscriptions.clear();
   }
 
   Function selectRow(
@@ -94,7 +92,6 @@ class DataTableBehavior {
   }
 
   LabelElement createCheckbox(Element row, List<Element> optRows) {
-    Function fn;
     LabelElement label = new LabelElement()
       ..classes
           .addAll([CHECKBOX, JS_CHECKBOX, RIPPLE_EFFECT, DATA_TABLE_SELECT]);
@@ -102,9 +99,8 @@ class DataTableBehavior {
       ..classes.add(CHECKBOX_INPUT);
     if (row != null) {
       checkbox.checked = row.classes.contains(IS_SELECTED);
-      fn = selectRow(checkbox, row, null);
-      changeListeners[checkbox] = fn;
-      checkbox.addEventListener('change', fn);
+      subscriptions.add(checkbox.onChange
+          .listen((event) => selectRow(checkbox, row, null)(event)));
 
       if (row.dataset.containsKey('mdlDataTableSelectableName')) {
         checkbox.name = row.dataset['mdlDataTableSelectableName'];
@@ -113,13 +109,12 @@ class DataTableBehavior {
         checkbox.value = row.dataset['mdlDataTableSelectableValue'];
       }
     } else if (optRows != null) {
-      fn = selectRow(checkbox, null, optRows);
-      changeListeners[checkbox] = fn;
-      checkbox.addEventListener('change', fn);
+      subscriptions.add(checkbox.onChange
+          .listen((event) => selectRow(checkbox, null, optRows)(event)));
     }
     label.append(checkbox);
-    CheckboxBehavior cb = new CheckboxBehavior(label);
-    cb.init();
+    checkboxes.add(new CheckboxBehavior(label)
+      ..init());
     return label;
   }
 }

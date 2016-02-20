@@ -26,7 +26,8 @@ class CheckboxBehavior {
   InputElement inputElement;
   CheckboxBehavior(this.element);
 
-  SpanElement rippleContainer;
+  List<StreamSubscription> subscriptions = [];
+  List<RippleBehavior> ripples = [];
 
   void init() {
     if (element != null) {
@@ -40,64 +41,49 @@ class CheckboxBehavior {
         element.append(boxOutline);
         if (element.classes.contains(RIPPLE_EFFECT)) {
           element.classes.add(RIPPLE_IGNORE_EVENTS);
-          rippleContainer = new SpanElement()
+          SpanElement rippleContainer = new SpanElement()
             ..classes.addAll(
-                [CHECKBOX_RIPPLE_CONTAINER, RIPPLE_EFFECT, RIPPLE_CENTER]);
-          rippleContainer.addEventListener('mouseup', onMouseUp);
-          Element ripple = new SpanElement()..classes.add(RIPPLE);
-          rippleContainer.append(ripple);
+                [CHECKBOX_RIPPLE_CONTAINER, RIPPLE_EFFECT, RIPPLE_CENTER])
+            ..append(new SpanElement()
+              ..classes.add(RIPPLE));
+          subscriptions.add(
+              rippleContainer.onMouseUp.listen((event) => onMouseUp(event)));
           element.append(rippleContainer);
-          RippleBehavior rb = new RippleBehavior(rippleContainer);
-          rb.init();
+          ripples.add(new RippleBehavior(rippleContainer)
+            ..init());
         }
-        inputElement.addEventListener('change', onChange);
-        inputElement.addEventListener('focus', onFocus);
-        inputElement.addEventListener('blur', onBlur);
-        element.addEventListener('mouseup', onMouseUp);
-        // wait a click for angular2 to set value
-        Timer.run(() {
-          updateClasses();
-          element.classes.add(IS_UPGRADED);
-        });
+        subscriptions..add(
+            inputElement.onChange.listen((event) => onChange(event)))..add(
+            inputElement.onFocus.listen((event) => onFocus(event)))..add(
+            inputElement.onBlur.listen((event) => onBlur(event)))..add(
+            element.onMouseUp.listen((event) => onMouseUp(event)));
+
+        updateClasses();
+        element.classes.add(IS_UPGRADED);
       }
     }
   }
 
   void destroy() {
-    if (element != null && element.classes.contains(IS_UPGRADED)) {
-      inputElement.removeEventListener('change', onChange);
-      inputElement.removeEventListener('focus', onFocus);
-      inputElement.removeEventListener('blur', onBlur);
-      element.removeEventListener('mouseup', onMouseUp);
-      if (element.classes.contains(RIPPLE_EFFECT)) {
-        rippleContainer.removeEventListener('mouseup', onMouseUp);
-        RippleBehavior rb = new RippleBehavior(rippleContainer);
-        rb.destroy();
-      }
+    for (StreamSubscription subscription in subscriptions) {
+      subscription.cancel();
     }
+    subscriptions.clear();
+    for (RippleBehavior ripple in ripples) {
+      ripple.destroy();
+    }
+    ripples.clear();
   }
 
-  void onChange(Event event) {
-    updateClasses();
-  }
+  void onChange(Event event) => updateClasses();
 
-  void onFocus(Event event) {
-    element.classes.add(IS_FOCUSED);
-  }
+  bool onFocus(Event event) => element.classes.add(IS_FOCUSED);
 
-  void onBlur(Event event) {
-    element.classes.remove(IS_FOCUSED);
-  }
+  bool onBlur(Event event) => element.classes.remove(IS_FOCUSED);
 
-  void blur() {
-    Timer.run(() {
-      inputElement.blur();
-    });
-  }
+  void blur() => Timer.run(() => inputElement.blur());
 
-  void onMouseUp(Event event) {
-    blur();
-  }
+  void onMouseUp(Event event) => blur();
 
   void updateClasses() {
     checkDisabled();

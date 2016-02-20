@@ -20,6 +20,9 @@ import 'src/directives/material_textfield.dart' show TextfieldBehavior;
 import 'src/directives/material_tooltip.dart' show TooltipBehavior;
 import 'src/directives/material_snackbar.dart' show SnackbarBehavior;
 
+export 'src/directives/dialog_polyfill.dart';
+//export DialogManager, DialogWrapper;
+
 @Directive(selector: '.mdl-js-button')
 class MaterialButton extends ButtonBehavior implements OnInit, OnDestroy {
   MaterialButton(ElementRef ref) : super(ref.nativeElement);

@@ -1,6 +1,7 @@
 library material_slider;
 
 import 'dart:html';
+import 'dart:async';
 
 //css constants
 const String IE_CONTAINER = 'mdl-slider__ie-container';
@@ -19,6 +20,7 @@ class SliderBehavior {
   dynamic step = 1;
   Element backgroundLower;
   Element backgroundUpper;
+  List<StreamSubscription> subscriptions = [];
 
   SliderBehavior(this.element) {
     Element container = new DivElement()..classes.add(SLIDER_CONTAINER);
@@ -31,10 +33,9 @@ class SliderBehavior {
     backgroundFlex.append(backgroundLower);
     backgroundUpper = new DivElement()..classes.add(BACKGROUND_UPPER);
     backgroundFlex.append(backgroundUpper);
-
-    element.addEventListener('input', onChange);
-    element.addEventListener('change', onChange);
-    element.addEventListener('mouseup', onMouseUp);
+    subscriptions..add(element.onInput.listen((event) => onChange(event)))..add(
+        element.onChange.listen((event) => onChange(event)))..add(
+        element.onMouseUp.listen((event) => onMouseUp(event)));
 
     if (element.getAttribute('value') == element.getAttribute('min')) {
       element.classes.add(IS_LOWEST_VALUE);
@@ -43,9 +44,10 @@ class SliderBehavior {
   }
 
   void destroy() {
-    element.removeEventListener('input', onChange);
-    element.removeEventListener('change', onChange);
-    element.removeEventListener('mouseup', onMouseUp);
+    for (StreamSubscription subscription in subscriptions) {
+      subscription.cancel();
+    }
+    subscriptions.clear();
   }
 
   void updateValueStyles() {

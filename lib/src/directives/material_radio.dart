@@ -2,7 +2,7 @@ library material_radio;
 
 import 'material_ripple.dart' show RippleBehavior;
 import 'dart:html';
-import 'dart:async' show Timer;
+import 'dart:async';
 
 // css classes
 const String JS_RADIO = 'mdl-js-radio';
@@ -22,7 +22,9 @@ const String IS_UPGRADED = 'is-upgraded';
 class RadioBehavior {
   Element element;
   InputElement buttonElement;
-  SpanElement rippleContainer;
+  List<StreamSubscription> subscriptions = [];
+  List<RippleBehavior> ripples = [];
+
   RadioBehavior(this.element);
 
   void init() {
@@ -38,21 +40,25 @@ class RadioBehavior {
       element.classes.add(RIPPLE_IGNORE_EVENTS);
       element.classes.remove(RIPPLE_EFFECT);
 
-      rippleContainer = new SpanElement()
+      SpanElement rippleContainer = new SpanElement()
         ..classes
             .addAll([RADIO_RIPPLE_CONTAINER, RIPPLE_EFFECT, RIPPLE_CENTER]);
-      rippleContainer.addEventListener('mouseup', onMouseup);
+      subscriptions
+          .add(rippleContainer.onMouseUp.listen((event) => onMouseup(event)));
       Element ripple = new SpanElement()..classes.add(RIPPLE);
       rippleContainer.append(ripple);
       element.append(rippleContainer);
-      RippleBehavior rb = new RippleBehavior(rippleContainer);
-      rb.init();
+      ripples.add(new RippleBehavior(rippleContainer)
+        ..init());
     }
-    buttonElement.addEventListener('change', onChange);
-    buttonElement.addEventListener('focus', onFocus);
-    buttonElement.addEventListener('blur', onBlur);
-    buttonElement.addEventListener('m-r-g-updated', onUpdated);
-    element.addEventListener('mouseup', onMouseup);
+    subscriptions..add(
+        buttonElement.onChange.listen((event) => onChange(event)))..add(
+        buttonElement.onFocus.listen((event) => onFocus(event)))..add(
+        buttonElement.onBlur.listen((event) => onBlur(event)))..add(
+        buttonElement.on['m-r-g-updated'].listen((event) =>
+            onUpdated(event)))..add(
+        element.onMouseUp.listen((event) => onMouseup(event)));
+
     // wait a click for angular2 to set values
     Timer.run(() {
       updateClasses();
@@ -61,16 +67,14 @@ class RadioBehavior {
   }
 
   void destroy() {
-    buttonElement.removeEventListener('change', onChange);
-    buttonElement.removeEventListener('focus', onFocus);
-    buttonElement.removeEventListener('blur', onBlur);
-    buttonElement.removeEventListener('m-r-g-updated', onUpdated);
-    element.removeEventListener('mouseup', onMouseup);
-    if (rippleContainer != null) {
-      rippleContainer.removeEventListener('mouseup', onMouseup);
-      RippleBehavior rb = new RippleBehavior(rippleContainer);
-      rb.destroy();
+    for (StreamSubscription subscription in subscriptions) {
+      subscription.cancel();
     }
+    subscriptions.clear();
+    for (RippleBehavior ripple in ripples) {
+      ripple.destroy();
+    }
+    ripples.clear();
   }
 
   void onUpdated(Event event) {

@@ -1,7 +1,7 @@
 library material_ripple;
 
 import 'dart:html';
-import 'dart:async' show Timer;
+import 'dart:async' show Timer, StreamSubscription;
 import 'dart:math' show sqrt;
 import 'package:angular2_rbi/src/util/animation_frame.dart'
     show getAnimationFrame;
@@ -26,6 +26,7 @@ class RippleBehavior {
   int y = 0;
   int boundWidth;
   int boundHeight;
+  List<StreamSubscription> subscriptions = [];
 
   RippleBehavior(this.element);
 
@@ -34,12 +35,13 @@ class RippleBehavior {
       if (!element.classes.contains(HAS_RIPPLE_EVENTS)) {
         if (!element.classes.contains(RIPPLE_IGNORE_EVENTS)) {
           rippleElement = element.querySelector('.' + RIPPLE);
-          element.addEventListener('mousedown', downHandler);
-          element.addEventListener('touchstart', downHandler);
-          element.addEventListener('mouseup', upHandler);
-          element.addEventListener('touchend', upHandler);
-          element.addEventListener('mouseleave', upHandler);
-          element.addEventListener('blur', upHandler);
+          subscriptions..add(
+              element.onMouseDown.listen((event) => downHandler(event)))..add(
+              element.onMouseUp.listen((event) => upHandler(event)))..add(
+              element.onMouseLeave.listen((event) => upHandler(event)))..add(
+              element.onTouchStart.listen((event) => downHandler(event)))..add(
+              element.onTouchEnd.listen((event) => upHandler(event)))..add(
+              element.onBlur.listen((event) => upHandler(event)));
           element.classes.add(HAS_RIPPLE_EVENTS);
         }
       }
@@ -47,15 +49,10 @@ class RippleBehavior {
   }
 
   void destroy() {
-    if (element != null && element.classes.contains(HAS_RIPPLE_EVENTS)) {
-      element.removeEventListener('mousedown', downHandler);
-      element.removeEventListener('touchstart', downHandler);
-      element.removeEventListener('mouseup', upHandler);
-      element.removeEventListener('touchend', upHandler);
-      element.removeEventListener('mouseleave', upHandler);
-      element.removeEventListener('blur', upHandler);
-      element.classes.remove(HAS_RIPPLE_EVENTS);
+    for (StreamSubscription subscription in subscriptions) {
+      subscription.cancel();
     }
+    subscriptions.clear();
   }
 
   void upHandler(Event event) {

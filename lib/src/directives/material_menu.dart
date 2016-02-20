@@ -2,7 +2,7 @@ library material_menu;
 
 import 'dart:html';
 import 'material_ripple.dart' show RippleBehavior;
-import 'dart:async' show Timer;
+import 'dart:async';
 import 'package:angular2_rbi/src/util/animation_frame.dart'
     show getAnimationFrame;
 
@@ -42,6 +42,10 @@ class MenuBehavior {
   Element outline;
   Element forElement;
   bool closing = false;
+  List<StreamSubscription> subscriptions = [];
+  StreamSubscription transitionSubscription;
+  StreamSubscription clickAway;
+  List<RippleBehavior> ripples = [];
 
   MenuBehavior(this.element);
 
@@ -57,19 +61,22 @@ class MenuBehavior {
     container.insertBefore(outline, element);
     String forElId = element.getAttribute('for');
     if (forElId == null) {
-      forElId = element.getAttribute('data-for');
+      forElId = element.getAttribute('data-mdl-for');
     }
     if (forElId != null) {
       forElement = document.getElementById(forElId);
       if (forElement != null) {
-        forElement.addEventListener('click', handleForClick);
-        forElement.addEventListener('keydown', handleForKeyboardEvent);
+        subscriptions..add(
+            forElement.onClick.listen((event) => handleForClick(event)))..add(
+            forElement.onKeyDown
+                .listen((event) => handleForKeyboardEvent(event)));
       }
     }
     List<Element> items = element.querySelectorAll('.' + ITEM);
     for (Element item in items) {
-      item.addEventListener('click', handleItemClick);
-      item.addEventListener('keydown', handleItemKeyboardEvent);
+      subscriptions..add(
+          item.onClick.listen((event) => handleItemClick(event)))..add(
+          item.onKeyDown.listen((event) => handleItemKeyboardEvent(event)));
     }
     if (element.classes.contains(RIPPLE_EFFECT)) {
       element.classes.add(RIPPLE_IGNORE_EVENTS);
@@ -82,8 +89,8 @@ class MenuBehavior {
         rippleContainer.append(ripple);
         item.append(rippleContainer);
         item.classes.add(RIPPLE_EFFECT);
-        RippleBehavior rb = new RippleBehavior(item);
-        rb.init();
+        ripples.add(new RippleBehavior(item)
+          ..init());
       }
     }
     for (String klass in [
@@ -101,24 +108,14 @@ class MenuBehavior {
   }
 
   void destroy() {
-    String forElId = element.getAttribute('for');
-    if (forElId == null) {
-      forElId = element.getAttribute('data-for');
+    for (StreamSubscription subscription in subscriptions) {
+      subscription.cancel();
     }
-    if (forElId != null) {
-      forElement = document.getElementById(forElId);
-      if (forElement != null) {
-        forElement.removeEventListener('click', handleForClick);
-        forElement.removeEventListener('keydown', handleForKeyboardEvent);
-      }
+    subscriptions.clear();
+    for (RippleBehavior ripple in ripples) {
+      ripple.destroy();
     }
-    List<Element> items = element.querySelectorAll('.' + ITEM);
-    if (element.classes.contains(RIPPLE_EFFECT)) {
-      for (Element item in items) {
-        RippleBehavior rb = new RippleBehavior(item);
-        rb.destroy();
-      }
-    }
+    ripples.clear();
   }
 
   void handleForClick(Event event) {
@@ -184,12 +181,9 @@ class MenuBehavior {
           }
         } else if (event.keyCode == SPACE || event.keyCode == ENTER) {
           event.preventDefault();
-          MouseEvent e = new MouseEvent('mousedown');
-          event.target.dispatchEvent(e);
-          MouseEvent e1 = new MouseEvent('mouseup');
-          event.target.dispatchEvent(e1);
-          MouseEvent e2 = new MouseEvent('click');
-          event.target.dispatchEvent(e2);
+          event.target.dispatchEvent(new MouseEvent('mousedown'));
+          event.target.dispatchEvent(new MouseEvent('mouseup'));
+          event.target.dispatchEvent(new MouseEvent('click'));
         } else if (event.keyCode == ESCAPE) {
           event.preventDefault();
           hide();
@@ -204,9 +198,8 @@ class MenuBehavior {
       event.stopPropagation();
     } else {
       closing = true;
-      Duration duration = new Duration(milliseconds: CLOSE_TIMEOUT);
       new Timer(
-          duration,
+          new Duration(milliseconds: CLOSE_TIMEOUT),
           (() {
             closing = false;
             hide();
@@ -265,15 +258,16 @@ class MenuBehavior {
       getAnimationFrame().then((_) {
         doAnimation(height, width);
       });
+
       addAnimationEndListener();
-      Function clickedAway;
-      clickedAway = ((Event e) {
-        if (e != event && (closing == false || closing == null)) {
-          document.removeEventListener('click', clickedAway);
-          hide();
-        }
-      });
-      document.addEventListener('click', clickedAway);
+      clickAway = document.onClick.listen((e) => clickedAway(event, e));
+    }
+  }
+
+  void clickedAway(Event showEvent, MouseEvent clickEvent) {
+    if (clickEvent != showEvent && (closing == false || closing == null)) {
+      clickAway.cancel();
+      hide();
     }
   }
 
@@ -299,13 +293,12 @@ class MenuBehavior {
   }
 
   void addAnimationEndListener() {
-    element.addEventListener('transitionend', transitionCleanup);
-    element.addEventListener('webkitTransitionend', transitionCleanup);
+    transitionSubscription =
+        element.onTransitionEnd.listen((event) => transitionCleanup(event));
   }
 
   void transitionCleanup(Event event) {
-    element.removeEventListener('transitionend', transitionCleanup);
-    element.removeEventListener('webkitTransitionend', transitionCleanup);
+    transitionSubscription.cancel();
     element.classes.remove(IS_ANIMATING);
   }
 }

@@ -2,7 +2,7 @@ library material_button;
 
 import 'dart:html';
 import 'material_ripple.dart' show RippleBehavior;
-import 'dart:async' show Timer;
+import 'dart:async';
 
 const String RIPPLE_EFFECT = 'mdl-js-ripple-effect';
 const String BUTTON_RIPPLE_CONTAINER = 'mdl-button__ripple-container';
@@ -13,17 +13,18 @@ class ButtonBehavior {
   HtmlElement element;
   ButtonBehavior(this.element);
   SpanElement rippleElement;
+  List<StreamSubscription> subscriptions = [];
+  List<RippleBehavior> ripples = [];
 
   void destroy() {
-    if (rippleElement != null) {
-      rippleElement.removeEventListener('mouseup', blurHandler);
+    for (StreamSubscription subscription in subscriptions) {
+      subscription.cancel();
     }
-    if (element != null && element.classes.contains(RIPPLE_EFFECT)) {
-      element.removeEventListener('mouseup', blurHandler);
-      element.removeEventListener('mouseleave', blurHandler);
-      RippleBehavior rb = new RippleBehavior(element);
-      rb.destroy();
+    subscriptions.clear();
+    for (RippleBehavior ripple in ripples) {
+      ripple.destroy();
     }
+    ripples.clear();
   }
 
   void init() {
@@ -33,13 +34,15 @@ class ButtonBehavior {
       rippleElement = new SpanElement();
       rippleElement.classes.add(RIPPLE);
       rippleContainer.append(rippleElement);
-      rippleElement.addEventListener('mouseup', blurHandler);
       element.append(rippleContainer);
-      RippleBehavior rb = new RippleBehavior(element);
-      rb.init();
+      subscriptions
+          .add(rippleElement.onMouseUp.listen((event) => blurHandler(event)));
+      ripples.add(new RippleBehavior(element)
+        ..init());
     }
-    element.addEventListener('mouseup', blurHandler);
-    element.addEventListener('mouseleave', blurHandler);
+    subscriptions..add(
+        element.onMouseUp.listen((event) => blurHandler(event)))..add(
+        element.onMouseLeave.listen((event) => blurHandler(event)));
   }
 
   void enable() {
@@ -58,9 +61,5 @@ class ButtonBehavior {
     element.classes.add(BUTTON_DISABLED);
   }
 
-  void blurHandler(MouseEvent event) {
-    Timer.run(() {
-      element.blur();
-    });
-  }
+  void blurHandler(MouseEvent event) => Timer.run(() => element.blur());
 }
