@@ -8,6 +8,7 @@ const String IS_ACTIVE = 'is-active';
 class TooltipBehavior {
   Element element;
   List<StreamSubscription> subscriptions = [];
+  List<StreamSubscription> mouseSubscriptions = [];
 
   TooltipBehavior(this.element);
   void init() {
@@ -66,14 +67,19 @@ class TooltipBehavior {
     }
     element.style.top = '${props.top + props.height + 10}px';
     element.classes.add(IS_ACTIVE);
-    window.addEventListener('scroll', handleMouseLeave, false);
-    window.addEventListener('touchmove', handleMouseLeave, false);
+//    window.addEventListener('scroll', handleMouseLeave, false);
+//    window.addEventListener('touchmove', handleMouseLeave, false);
+    mouseSubscriptions..add(
+        window.onScroll.listen((event) => handleMouseLeave(event)))..add(
+        window.onTouchMove.listen((event) => handleMouseLeave(event)));
   }
 
   void handleMouseLeave(Event event) {
     event.stopPropagation();
     element.classes.remove(IS_ACTIVE);
-    window.removeEventListener('scroll', handleMouseLeave);
-    window.removeEventListener('touchmove', handleMouseLeave, false);
+    for (StreamSubscription subscription in mouseSubscriptions) {
+      subscription.cancel();
+    }
+    mouseSubscriptions.clear();
   }
 }
