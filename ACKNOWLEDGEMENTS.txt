@@ -2,8 +2,10 @@ Since this code is a fairly straight-out Dart Language translation of the
 JavaScript in Material Design Lite, I'm indebted to Google and the contributors
 to Material Design Lite.
 
-I peeked at Material Design Lite / Dart (www.material-design-lite.pub) at some
+I peeked at Material Design Lite / Dart <www.material-design-lite.pub> at some
 points during development, so thanks also to Mike Mitterer.
 
+rbi_dialog is based on https://github.com/GoogleChrome/dialog-polyfill
+
 - Jim Washington
-- 3 Jan 2016
+- 22 Feb 2016

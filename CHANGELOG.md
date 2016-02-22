@@ -39,3 +39,9 @@
 ## 0.0.9
 
 - initialize Map in data table
+
+## 0.1.0
+
+- update snackbar 
+- refactor event listeners and make them really go away on destroy
+- add implementation of rbi_dialog polyfill for dialogs

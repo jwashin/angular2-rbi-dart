@@ -39,12 +39,20 @@ class TextfieldBehavior {
       if (maxRows != NO_MAX_ROWS) {
         subscriptions.add(input.onKeyDown.listen((event) => onKeyDown(event)));
       }
+      bool invalid = element.classes.contains(IS_INVALID);
 
       //wait a click for angular2 to init the value
       Timer.run(() {
         updateClasses();
         element.classes.add(IS_UPGRADED);
       });
+      if (invalid) {
+        element.classes.add(IS_INVALID);
+      }
+      if (input.attributes.containsKey('autofocus')) {
+        element.focus();
+        checkFocus();
+      }
     }
   }
 
@@ -85,6 +93,14 @@ class TextfieldBehavior {
     checkDisabled();
     checkValidity();
     checkDirty();
+    checkFocus();
+  }
+
+  void checkFocus() {
+    if (element.querySelector(':focus') != null) {
+      element.classes.add(IS_FOCUSED);
+    } else
+      element.classes.remove(IS_FOCUSED);
   }
 
   void checkDisabled() {

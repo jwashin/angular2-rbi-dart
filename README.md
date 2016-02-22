@@ -5,9 +5,9 @@ This is a small library to use the excellent Material Design Lite (MDL) CSS syst
 I translated the dynamic JavaScript parts of MDL into Dart and made corresponding Angular2 directives. These key on the same selectors as the JavaScript implementation. E.g, If you want a dynamic Material Button, include the 'mdl-js-button' class,
 just like in the instructions for Material Design Lite. Then, in your component metadata, use the MaterialButton directive provided in package:angular2_rbi/directives.dart to add the dynamic effects.
 
-## Caveats
-
-RBI stands for 'Really Bad Idea.' This is a stopgap to make the dynamic stuff in MDL work acceptably in Angular2 for Dart until Angular2 has its own Material Design implementation. It is not an improvement on MDL. In use, it will have the same issues as MDL, which is a large and complex CSS system.
+RBI now stands for 'Realistically Better Implementation.' This is low-fuss way to use MDL in Angular2 for Dart. 
+It is not an improvement on MDL. In use, it will have the same issues as MDL, which is a large and complex CSS system.
+Much of its work is direct DOM access, so if you are not using webworkers, this could be useful. 
 
 ## Usage
 
@@ -59,7 +59,7 @@ This page at <http://www.getmdl.io> demonstrates the available [MDL components](
 
 ## Features and bugs
 
-This currently (31 January, 2016) seems to work with MDL 1.0.6. I have not figured out testing yet, so a contributed test harness would be graciously accepted.
+This currently (22 February, 2016) seems to work with MDL 1.1.1. I have not figured out testing yet, so a contributed test harness would be graciously accepted.
 
 Please file issues with MDL at [Github: Material Design Lite] (https://github.com/google/material-design-lite). And be nice. They have a system to decide what needs to happen when.
 
