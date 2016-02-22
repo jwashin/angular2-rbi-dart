@@ -3,7 +3,6 @@ library dialog_widget;
 import 'package:angular2/angular2.dart';
 import 'dart:html';
 import 'dart:async';
-//import 'dart:math';
 
 const int NORMAL_ALIGNMENT = 0;
 const int CENTERED_ALIGNMENT = 1;
@@ -52,12 +51,12 @@ class DialogWrapper implements OnInit {
   int alignment = NORMAL_ALIGNMENT;
   Element anchorElement;
   Element originalParent;
+  int originalIndex;
 
 //  bool replacedStyleTop = false;
   bool openAsModal = false;
   bool isNativeDialog = false;
   DialogManager dialogManager;
-  Element oldParent;
   StreamSubscription cancelListener;
   Element get dialog => elementRef.nativeElement;
 
@@ -73,9 +72,9 @@ class DialogWrapper implements OnInit {
       restore();
       dialog.setAttribute('role', 'dialog');
     }
+    originalParent = dialog.parent;
+    originalIndex = dialog.parent.children.indexOf(dialog);
 //    print('native dialog is $isNativeDialog');
-
-//    element.parent.insertAdjacentElement('afterEnd',)
   }
 
   void restore() {
@@ -173,7 +172,6 @@ class DialogWrapper implements OnInit {
     /// we will presume that we just want to drop the dialog into
     /// the target element.
     ///
-    oldParent = dialog.parent;
     if (!anchorElement.children.contains(dialog)) {
       anchorElement.children.add(dialog);
     }
@@ -295,7 +293,9 @@ class DialogWrapper implements OnInit {
     dialog.dispatchEvent(closeEvent);
     if (openAsModal) {
       dialogManager.removeDialog(this);
-//      backdrop.removeEventListener('click', backdropClick);
+    }
+    if (!originalParent.children.contains(dialog)) {
+      originalParent.children.insert(originalIndex, dialog);
     }
   }
 
@@ -460,7 +460,6 @@ class DialogManager {
     modalAttachment.append(overlay);
     dmFocus = document.body.onFocus.listen((event) => handleFocus(event));
     dmKeyDown = document.onKeyDown.listen((event) => handleKey(event));
-//    document.addEventListener('keydown', handleKey);
 //    print('document blocked');
   }
 
@@ -515,7 +514,6 @@ class DialogManager {
     if (pendingDialogStack.length >= allowed) {
       return false;
     }
-    dialog.originalParent = dialog.dialog.parent;
     modalAttachment.append(dialog.dialog);
     pendingDialogStack.add(dialog);
     if (pendingDialogStack.length == 1) {
@@ -528,7 +526,6 @@ class DialogManager {
   void removeDialog(DialogWrapper dialog) {
     if (pendingDialogStack.contains(dialog)) {
       pendingDialogStack.remove(dialog);
-      dialog.originalParent.append(dialog.dialog);
       if (pendingDialogStack.isEmpty) {
         unblockDocument();
       } else {
