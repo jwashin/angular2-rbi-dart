@@ -272,9 +272,7 @@ class DialogManager {
 //  same as document.addEventListener('submit', (Event event) {
 //  handler...
 //    }, true);
-    Element.submitEvent
-        .forTarget(document, useCapture: true)
-        .listen((event) {
+    Element.submitEvent.forTarget(document, useCapture: true).listen((event) {
       Element target = event.target;
       if (target == null ||
           !target.attributes.containsKey('method') ||
