@@ -14,16 +14,6 @@
     display: none;
 }
 
-.rbi-dialog.rbi-dialog-centered {
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    margin: auto;
-    overflow: auto;
-    position: absolute;
-}
-
 .rbi-dialog.rbi-dialog-magic {
     position: absolute;
 }
@@ -36,21 +26,12 @@
     display: table;
 }
 
-.rbi-dialog + .backdrop {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: rgba(0, 0, 0, 0.8);
-}
-
 /* for small devices, modal dialogs go full-screen */
 @media screen and (max-width: 540px) {
     .rbi-dialog[open] {
         top: 0;
-        width: auto;
         margin: 1em;
+        /*display:block;*/
     }
 }
 
@@ -61,4 +42,23 @@
     bottom: 0;
     left: 0;
     background-color: rgba(0, 0, 0, .1);
+    display: -webkit-flex;
+    display: flex;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    overflow: auto;
+}
+
+@media screen and (max-width: 540px) {
+    ._dialog_overlay {
+        position: absolute;
+        display: block;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-color: rgba(0, 0, 0, .1);
+    }
 }
