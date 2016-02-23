@@ -30,9 +30,9 @@ Element findNearestDialog(Element el) {
 //    void close(optional DOMString returnValue);
 //  };
 
-@Component(selector: '.rbi-dialog', template: '<ng-content></ng-content>',
+@Component(selector: '.rbi-dialog', template: '<ng-content></ng-content>'
 //    styleUrls: const['rbi_dialog.css'],
-    directives: const [CORE_DIRECTIVES])
+)
 class DialogWrapper implements OnInit {
   @Input() String returnValue = '';
   @HostBinding('style.z-index') String dialogZ = '0';
@@ -42,6 +42,7 @@ class DialogWrapper implements OnInit {
   Element anchorElement;
   Element originalParent;
   int originalIndex;
+  String oldAnchorPositionStyle;
 
   bool openAsModal = false;
   bool isNativeDialog = false;
@@ -67,7 +68,6 @@ class DialogWrapper implements OnInit {
 
   void restore() {
     dialogZ = '10000';
-    dialog.classes.remove('rbi-dialog-centered');
     dialog.classes.remove('rbi-dialog-magic');
   }
 
@@ -150,6 +150,11 @@ class DialogWrapper implements OnInit {
     /// the target element.
     ///
     if (!anchorElement.children.contains(dialog)) {
+      String anchorPositioning = anchorElement.style.position;
+      if (['', 'static'].contains(anchorPositioning)) {
+        oldAnchorPositionStyle = anchorPositioning;
+        anchorElement.style.position = 'relative';
+      }
       anchorElement.children.add(dialog);
     }
   }
@@ -183,10 +188,6 @@ class DialogWrapper implements OnInit {
       d.showModal();
       return;
     }
-//    dialog.classes.remove('rbi-dialog-magic');
-
-    dialog.classes.add('rbi-dialog-centered');
-
     if (!dialogManager.pushDialog(this)) {
       print('showmodal called; too many open modal dialogs');
       return;
@@ -209,8 +210,11 @@ class DialogWrapper implements OnInit {
     }
     setOpen(false);
     alignment = NORMAL_ALIGNMENT;
-
+    if (oldAnchorPositionStyle != null) {
+      anchorElement.style.position = oldAnchorPositionStyle;
+    }
     anchorElement = null;
+    oldAnchorPositionStyle = null;
     if (value != null) {
       setReturnValue(value);
     }
