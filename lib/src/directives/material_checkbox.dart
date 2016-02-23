@@ -57,8 +57,7 @@ class CheckboxBehavior {
             inputElement.onFocus.listen((event) => onFocus(event)))..add(
             inputElement.onBlur.listen((event) => onBlur(event)))..add(
             element.onMouseUp.listen((event) => onMouseUp(event)));
-
-        updateClasses();
+        Timer.run(() => updateClasses());
         element.classes.add(IS_UPGRADED);
       }
     }
