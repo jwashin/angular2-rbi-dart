@@ -1,4 +1,4 @@
-.rbi-dialog {
+rbi-dialog {
     border: solid;
     padding: 1em;
     background: white;
@@ -14,21 +14,17 @@
     display: none;
 }
 
-.rbi-dialog.rbi-dialog-magic {
+rbi-dialog.rbi-dialog-magic {
     position: absolute;
 }
 
-.rbi-anchor {
-    position: relative;
-}
-
-.rbi-dialog[open] {
-    display: table;
+rbi-dialog[open] {
+    display: block;
 }
 
 /* for small devices, modal dialogs go full-screen */
 @media screen and (max-width: 540px) {
-    .rbi-dialog[open] {
+    rbi-dialog[open] {
         top: 0;
         margin: 1em;
         /*display:block;*/

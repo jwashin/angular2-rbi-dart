@@ -30,7 +30,7 @@ Element findNearestDialog(Element el) {
 //    void close(optional DOMString returnValue);
 //  };
 
-@Component(selector: '.rbi-dialog', template: '<ng-content></ng-content>'
+@Component(selector: 'rbi-dialog', template: '<ng-content></ng-content>'
 //    styleUrls: const['rbi_dialog.css'],
 )
 class DialogWrapper implements OnInit {

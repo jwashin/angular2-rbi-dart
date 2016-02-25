@@ -19,8 +19,11 @@ import 'src/directives/material_switch.dart' show SwitchBehavior;
 import 'src/directives/material_textfield.dart' show TextfieldBehavior;
 import 'src/directives/material_tooltip.dart' show TooltipBehavior;
 import 'src/directives/material_snackbar.dart' show SnackbarBehavior;
+import 'src/directives/rbi_dialog.dart';
 
-export 'src/directives/rbi_dialog.dart';
+//export 'src/components/button.dart';
+//export 'src/components/checkbox.dart';
+
 //export DialogManager, DialogWrapper;
 
 @Directive(selector: '.mdl-js-button')
@@ -246,3 +249,22 @@ class MaterialBadge implements OnChanges {
     ref.nativeElement.setAttribute('data-badge', '$badge');
   }
 }
+
+const List<Type> RBI_DIRECTIVES = const [
+  MaterialButton,
+  MaterialCheckbox,
+  MaterialDataTable,
+  MaterialIconToggle,
+  MaterialLayout,
+  MaterialMenu,
+  MaterialProgress,
+  MaterialRadio,
+  MaterialSlider,
+  MaterialSnackbar,
+  MaterialSpinner,
+  MaterialSwitch,
+  MaterialTabs,
+  MaterialTextfield,
+  MaterialTooltip,
+  DialogWrapper
+];
