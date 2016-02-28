@@ -1,7 +1,7 @@
 linter:
   rules:
     - always_declare_return_types
-#    - always_specify_types
+    - always_specify_types
     - avoid_as
     - camel_case_types
 #    - constant_identifier_names
