@@ -5,7 +5,7 @@ import 'dart:async';
 
 Future<num> getAnimationFrame() {
   Completer<num> completer = new Completer<num>.sync();
-  window.requestAnimationFrame((time) {
+  window.requestAnimationFrame((dynamic time) {
     completer.complete(time);
   });
   return completer.future;

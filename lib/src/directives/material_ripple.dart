@@ -1,7 +1,7 @@
 library material_ripple;
 
 import 'dart:html';
-import 'dart:async' show Timer, StreamSubscription;
+import 'dart:async';
 import 'dart:math' show sqrt;
 import 'package:angular2_rbi/src/util/animation_frame.dart'
     show getAnimationFrame;
@@ -35,13 +35,17 @@ class RippleBehavior {
       if (!element.classes.contains(HAS_RIPPLE_EVENTS)) {
         if (!element.classes.contains(RIPPLE_IGNORE_EVENTS)) {
           rippleElement = element.querySelector('.' + RIPPLE);
-          subscriptions..add(
-              element.onMouseDown.listen((event) => downHandler(event)))..add(
-              element.onMouseUp.listen((event) => upHandler(event)))..add(
-              element.onMouseLeave.listen((event) => upHandler(event)))..add(
-              element.onTouchStart.listen((event) => downHandler(event)))..add(
-              element.onTouchEnd.listen((event) => upHandler(event)))..add(
-              element.onBlur.listen((event) => upHandler(event)));
+          subscriptions..add(element.onMouseDown
+              .listen((MouseEvent event) => downHandler(event)))..add(
+              element.onMouseUp
+                  .listen((MouseEvent event) => upHandler(event)))..add(
+              element.onMouseLeave
+                  .listen((MouseEvent event) => upHandler(event)))..add(
+              element.onTouchStart
+                  .listen((TouchEvent event) => downHandler(event)))..add(
+              element.onTouchEnd
+                  .listen((TouchEvent event) => upHandler(event)))..add(
+              element.onBlur.listen((Event event) => upHandler(event)));
           element.classes.add(HAS_RIPPLE_EVENTS);
         }
       }
@@ -69,7 +73,7 @@ class RippleBehavior {
     }
   }
 
-  void downHandler(Event event) {
+  Future downHandler(Event event) async {
     if (rippleElement.style.width == '' && rippleElement.style.height == '') {
       Rectangle rect = element.getBoundingClientRect();
       boundHeight = rect.height.toInt();
@@ -104,9 +108,8 @@ class RippleBehavior {
     }
 
     setRippleStyles(true);
-    getAnimationFrame().then((_) {
-      animationFrameHandler();
-    });
+    await getAnimationFrame();
+    animationFrameHandler();
   }
 
   void setRippleStyles(bool start) {
@@ -131,11 +134,10 @@ class RippleBehavior {
     }
   }
 
-  void animationFrameHandler() {
+  Future animationFrameHandler() async {
     if (frameCount-- > 0) {
-      getAnimationFrame().then((_) {
-        animationFrameHandler();
-      });
+      await getAnimationFrame();
+      animationFrameHandler();
     } else {
       setRippleStyles(false);
     }

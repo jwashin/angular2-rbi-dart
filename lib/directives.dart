@@ -250,7 +250,7 @@ class MaterialBadge implements OnChanges {
   }
 }
 
-const List<Type> RBI_DIRECTIVES = const [
+const List<Type> rbiDirectives = const [
   MaterialButton,
   MaterialCheckbox,
   MaterialDataTable,

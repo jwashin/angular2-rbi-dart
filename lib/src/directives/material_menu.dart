@@ -66,17 +66,18 @@ class MenuBehavior {
     if (forElId != null) {
       forElement = document.getElementById(forElId);
       if (forElement != null) {
-        subscriptions..add(
-            forElement.onClick.listen((event) => handleForClick(event)))..add(
+        subscriptions..add(forElement.onClick
+            .listen((MouseEvent event) => handleForClick(event)))..add(
             forElement.onKeyDown
-                .listen((event) => handleForKeyboardEvent(event)));
+                .listen((KeyboardEvent event) =>
+                handleForKeyboardEvent(event)));
       }
     }
     List<Element> items = element.querySelectorAll('.' + ITEM);
     for (Element item in items) {
-      subscriptions..add(
-          item.onClick.listen((event) => handleItemClick(event)))..add(
-          item.onKeyDown.listen((event) => handleItemKeyboardEvent(event)));
+      subscriptions..add(item.onClick.listen((MouseEvent event) =>
+          handleItemClick(event)))..add(item.onKeyDown
+          .listen((KeyboardEvent event) => handleItemKeyboardEvent(event)));
     }
     if (element.classes.contains(RIPPLE_EFFECT)) {
       element.classes.add(RIPPLE_IGNORE_EVENTS);
@@ -229,7 +230,7 @@ class MenuBehavior {
     }
   }
 
-  void show(Event event) {
+  Future show(Event event) async {
     if (element != null && container != null && outline != null) {
       Rectangle rect = element.getBoundingClientRect();
       int height = rect.height.toInt();
@@ -255,12 +256,11 @@ class MenuBehavior {
         item.style.transitionDelay = itemDelay;
       }
       applyClip(height, width);
-      getAnimationFrame().then((_) {
-        doAnimation(height, width);
-      });
-
+      await getAnimationFrame();
+      doAnimation(height, width);
       addAnimationEndListener();
-      clickAway = document.onClick.listen((e) => clickedAway(event, e));
+      clickAway =
+          document.onClick.listen((MouseEvent e) => clickedAway(event, e));
     }
   }
 
@@ -293,8 +293,8 @@ class MenuBehavior {
   }
 
   void addAnimationEndListener() {
-    transitionSubscription =
-        element.onTransitionEnd.listen((event) => transitionCleanup(event));
+    transitionSubscription = element.onTransitionEnd
+        .listen((Event event) => transitionCleanup(event));
   }
 
   void transitionCleanup(Event event) {

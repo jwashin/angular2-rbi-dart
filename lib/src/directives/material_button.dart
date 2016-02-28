@@ -36,13 +36,15 @@ class ButtonBehavior {
       rippleContainer.append(rippleElement);
       element.append(rippleContainer);
       subscriptions
-          .add(rippleElement.onMouseUp.listen((event) => blurHandler(event)));
+          .add(rippleElement.onMouseUp.listen((MouseEvent event) =>
+          blurHandler(event)));
       ripples.add(new RippleBehavior(element)
         ..init());
     }
     subscriptions..add(
-        element.onMouseUp.listen((event) => blurHandler(event)))..add(
-        element.onMouseLeave.listen((event) => blurHandler(event)));
+        element.onMouseUp.listen((MouseEvent event) =>
+            blurHandler(event)))..add(
+        element.onMouseLeave.listen((MouseEvent event) => blurHandler(event)));
   }
 
   void enable() {

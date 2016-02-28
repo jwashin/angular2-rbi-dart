@@ -44,19 +44,17 @@ class CheckboxBehavior {
           SpanElement rippleContainer = new SpanElement()
             ..classes.addAll(
                 [CHECKBOX_RIPPLE_CONTAINER, RIPPLE_EFFECT, RIPPLE_CENTER])
-            ..append(new SpanElement()
-              ..classes.add(RIPPLE));
+            ..append(new SpanElement()..classes.add(RIPPLE));
           subscriptions.add(
               rippleContainer.onMouseUp.listen((event) => onMouseUp(event)));
           element.append(rippleContainer);
-          ripples.add(new RippleBehavior(rippleContainer)
-            ..init());
+          ripples.add(new RippleBehavior(rippleContainer)..init());
         }
-        subscriptions..add(
-            inputElement.onChange.listen((event) => onChange(event)))..add(
-            inputElement.onFocus.listen((event) => onFocus(event)))..add(
-            inputElement.onBlur.listen((event) => onBlur(event)))..add(
-            element.onMouseUp.listen((event) => onMouseUp(event)));
+        subscriptions
+          ..add(inputElement.onChange.listen((event) => onChange(event)))
+          ..add(inputElement.onFocus.listen((event) => onFocus(event)))
+          ..add(inputElement.onBlur.listen((event) => onBlur(event)))
+          ..add(element.onMouseUp.listen((event) => onMouseUp(event)));
         Timer.run(() => updateClasses());
         element.classes.add(IS_UPGRADED);
       }
