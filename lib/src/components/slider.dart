@@ -3,8 +3,8 @@ import 'dart:html';
 import 'package:angular2/angular2.dart';
 
 /// Slider Directive
-///     usage: make an `<input type="range">` tag with classes 'mdl-slider' and
-///     'mdl-js-slider' with tag attributes max, min, value, and step.
+///     usage: make an `<input type="range">` tag with class 'mdl-slider'
+///     and tag attributes max, min, value, and step.
 ///
 ///     min, max, value, and step may be dynamic inputs and can be numbers or
 ///     strings that parse to numbers.
@@ -13,7 +13,7 @@ import 'package:angular2/angular2.dart';
 ///
 ///     use e.g., `[(ngModel)]="someVariable"` to operate on the value.
 ///
-///       `<input class="mdl-slider mdl-js-slider" type="range" min="0"
+///       `<input class="mdl-slider mdl-slider" type="range" min="0"
 ///       max="100" [(ngModel)]="sliderValue1" tabindex="0">
 ///       <p>{{sliderValue1}}</p>`
 ///
@@ -48,7 +48,8 @@ class Slider implements OnInit, AfterContentInit {
 
   void ngOnInit() {
     // we do this here instead of a template because we have to enclose
-    // the host input element in another element
+    // the host input element in another element, then make new elements
+    // siblings instead of children of the host input
     InputElement hostElement = _ref.nativeElement;
     Element parent = hostElement.parent;
     Element container = _renderer.createElement(parent, 'div');
