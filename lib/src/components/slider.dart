@@ -1,5 +1,4 @@
 import 'dart:html';
-import 'dart:async';
 
 import 'package:angular2/angular2.dart';
 
@@ -26,7 +25,7 @@ num asNumber(dynamic aValue) {
 }
 
 @Directive(selector: '.mdl-slider')
-class SliderElement implements OnChanges {
+class SliderElement {
   @Input() dynamic min = 0;
   @Input() dynamic max = 100;
   @Input() dynamic value = 0;
@@ -42,14 +41,6 @@ class SliderElement implements OnChanges {
 
   @HostListener('mouseup', const ['\$event.target'])
   void onMouseUp(InputElement target) => target.blur();
-
-//  @Output() EventEmitter<num> newValue = new EventEmitter();
-
-  void ngOnChanges(Map<String, SimpleChange> changes) {
-    print('changes: ${changes.keys}');
-//    print ('new value: ${changes['value'].currentValue}');
-    Timer.run(() => updateValueAndStyles(value));
-  }
 
   void updateValueAndStyles(dynamic inputValue) {
     value = inputValue;
@@ -76,8 +67,6 @@ class Slider implements AfterContentInit {
       max = asNumber(sliderElement.max);
       min = asNumber(sliderElement.min);
       value = asNumber(sliderElement.value);
-//      setSliderValues();
-      print('we have slider element $min, $max, $value');
     }
     if (ngModelInput != null) {
       value = asNumber(ngModelInput.value);
