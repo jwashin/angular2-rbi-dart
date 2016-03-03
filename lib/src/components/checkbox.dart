@@ -27,7 +27,7 @@ class Checkbox implements AfterContentInit {
 
   @ContentChild(NgModel) NgModel ngModelInput;
   @ContentChild(FocusSource) FocusSource checkboxInput;
-  @ContentChild(DisabledInput) DisabledInput disabledInput;
+  @ContentChildren(DisabledInput) QueryList<DisabledInput> disabledInput;
 
   @ViewChild(Ripple) Ripple ripple;
 
@@ -57,8 +57,13 @@ class Checkbox implements AfterContentInit {
     if (checkboxInput != null) {
       checkboxInput.hasFocus.listen((bool event) => isFocused = event);
     }
-    if (disabledInput != null) {
+    if (disabledInput.isNotEmpty) {
       isDisabled = true;
     }
+    disabledInput.changes.listen((_) {
+      if (disabledInput.isNotEmpty) {
+        isDisabled = true;
+      }
+    });
   }
 }
