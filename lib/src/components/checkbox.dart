@@ -19,17 +19,18 @@ import 'input_directives.dart';
 <span class="mdl-checkbox__ripple-container"></span>
 ''',
     directives: const [CenteredRippleContainer])
-class Checkbox implements AfterContentInit {
+class Checkbox implements AfterContentInit, OnDestroy {
   @HostBinding('class.is-checked') bool isChecked;
   @HostBinding('class.is-upgraded') bool isUpgraded = true;
   @HostBinding('class.is-focused') bool isFocused = false;
   @HostBinding('class.is-disabled') bool isDisabled = false;
-
   @ContentChild(NgModel) NgModel ngModelInput;
   @ContentChild(FocusSource) FocusSource checkboxInput;
   @ContentChildren(DisabledInput) QueryList<DisabledInput> disabledInput;
 
   @ViewChild(Ripple) Ripple ripple;
+
+  List<StreamSubscription> subscriptions = [];
 
   @HostListener('mouseup')
   void onMouseUp() {
@@ -50,12 +51,13 @@ class Checkbox implements AfterContentInit {
 
     if (ngModelInput != null) {
       isChecked = ngModelInput.value;
-      ngModelInput.update.listen((bool newValue) {
+      subscriptions.add(ngModelInput.update.listen((bool newValue) {
         isChecked = newValue;
-      });
+      }));
     }
     if (checkboxInput != null) {
-      checkboxInput.hasFocus.listen((bool event) => isFocused = event);
+      subscriptions.add(
+          checkboxInput.hasFocus.listen((bool event) => isFocused = event));
     }
     if (disabledInput.isNotEmpty) {
       isDisabled = true;
@@ -65,5 +67,12 @@ class Checkbox implements AfterContentInit {
         isDisabled = true;
       }
     });
+  }
+
+  void ngOnDestroy() {
+    for (StreamSubscription subscription in subscriptions) {
+      subscription.cancel();
+    }
+    subscriptions.clear();
   }
 }

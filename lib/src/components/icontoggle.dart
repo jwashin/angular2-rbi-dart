@@ -12,13 +12,15 @@ import 'ripple.dart';
 <span class="mdl-icon-toggle__ripple-container"></span>
 ''',
     directives: const [NgIf, CenteredRippleContainer])
-class IconToggle implements AfterContentInit {
+class IconToggle implements AfterContentInit, OnDestroy {
   @Input('class') String hostClasses;
   @HostBinding('class.is-checked') bool isChecked;
   @HostBinding('class.is-upgraded') bool isUpgraded = true;
   @HostBinding('class.is-focused') bool isFocused = false;
   @ContentChild(NgModel) NgModel ngModelInput;
   @ContentChild(FocusSource) FocusSource checkboxInput;
+
+  List<StreamSubscription> subscriptions = [];
 
   @HostListener('mouseup')
   void onMouseUp() {
@@ -30,11 +32,20 @@ class IconToggle implements AfterContentInit {
   void ngAfterContentInit() {
     //set listeners on the checkbox properties
     if (checkboxInput != null) {
-      checkboxInput.hasFocus.listen((bool event) => isFocused = event);
+      subscriptions.add(
+          checkboxInput.hasFocus.listen((bool event) => isFocused = event));
     }
     if (ngModelInput != null) {
       isChecked = ngModelInput.value;
-      ngModelInput.update.listen((bool newValue) => isChecked = newValue);
+      subscriptions.add(
+          ngModelInput.update.listen((bool newValue) => isChecked = newValue));
     }
+  }
+
+  void ngOnDestroy() {
+    for (StreamSubscription subscription in subscriptions) {
+      subscription.cancel();
+    }
+    subscriptions.clear();
   }
 }

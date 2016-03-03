@@ -20,7 +20,7 @@ import 'ripple.dart';
 </span>
 ''',
     directives: const [CenteredRippleContainer])
-class Switch implements AfterContentInit {
+class Switch implements AfterContentInit, OnDestroy {
   @HostBinding('class.is-checked') bool isChecked;
   @HostBinding('class.is-upgraded') bool isUpgraded = true;
   @HostBinding('class.is-disabled') bool isDisabled = false;
@@ -29,6 +29,8 @@ class Switch implements AfterContentInit {
   @ContentChild(FocusSource) FocusSource checkboxInput;
   @ContentChild(NgModel) NgModel ngModelInput;
   @ContentChild(DisabledInput) DisabledInput disabledInput;
+
+  List<StreamSubscription> subscriptions = [];
 
   @HostListener('mouseup')
   void onMouseUp() {
@@ -41,14 +43,23 @@ class Switch implements AfterContentInit {
     //set listeners on the checkbox properties
 
     if (checkboxInput != null) {
-      checkboxInput.hasFocus.listen((bool event) => isFocused = event);
+      subscriptions.add(
+          checkboxInput.hasFocus.listen((bool event) => isFocused = event));
     }
     if (ngModelInput != null) {
       isChecked = ngModelInput.value;
-      ngModelInput.update.listen((bool newValue) => isChecked = newValue);
+      subscriptions.add(
+          ngModelInput.update.listen((bool newValue) => isChecked = newValue));
     }
     if (disabledInput != null) {
       isDisabled = true;
     }
+  }
+
+  void ngOnDestroy() {
+    for (StreamSubscription subscription in subscriptions) {
+      subscription.cancel();
+    }
+    subscriptions.clear();
   }
 }

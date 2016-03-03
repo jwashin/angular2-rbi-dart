@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:angular2/angular2.dart';
 import 'input_directives.dart';
 
@@ -17,9 +18,7 @@ import 'input_directives.dart';
 ///
 
 @Component(selector: '.mdl-textfield', template: '<ng-content></ng-content>')
-class Textfield implements AfterContentInit {
-  int maxRows;
-
+class Textfield implements AfterContentInit, OnDestroy {
   @HostBinding('class.is-upgraded') bool isUpgraded = true;
   @HostBinding('class.is-disabled') bool isDisabled = false;
   @HostBinding('class.is-focused') bool isFocused = false;
@@ -30,23 +29,33 @@ class Textfield implements AfterContentInit {
   @ContentChildren(DisabledInput) QueryList<DisabledInput> disabledInput;
   @ContentChild(NgModel) NgModel ngModelInput;
 
+  List<StreamSubscription> subscriptions = [];
+
   void ngAfterContentInit() {
     if (textInput != null) {
-      textInput.hasFocus.listen((bool event) => isFocused = event);
+      subscriptions
+          .add(textInput.hasFocus.listen((bool event) => isFocused = event));
     }
     if (ngModelInput != null) {
-      ngModelInput.update.listen((_) {
+      subscriptions.add(ngModelInput.update.listen((_) {
         isDirty = ngModelInput.dirty;
         isInvalid = !ngModelInput.valid;
-      });
+      }));
     }
     if (disabledInput.isNotEmpty) {
       isDisabled = true;
     }
-    disabledInput.changes.listen((_) {
+    subscriptions.add(disabledInput.changes.listen((_) {
       if (disabledInput.isNotEmpty) {
         isDisabled = true;
       }
-    });
+    }));
+  }
+
+  void ngOnDestroy() {
+    for (StreamSubscription subscription in subscriptions) {
+      subscription.cancel();
+    }
+    subscriptions.clear();
   }
 }

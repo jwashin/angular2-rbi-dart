@@ -1,4 +1,5 @@
 import 'dart:html';
+import 'dart:async';
 
 import 'package:angular2/angular2.dart';
 
@@ -11,7 +12,7 @@ import 'package:angular2/angular2.dart';
 ///
 ///     use FORM_DIRECTIVES and Slider as directives in enclosing components.
 ///
-///     use e.g., `[(ngModel)]="someVariable"` to operate on the value.
+///     use e.g., `[(ngModel)]="someVariable"` to use/operate on the value.
 ///
 ///       `<input class="mdl-slider" type="range" min="0"
 ///       max="100" [(ngModel)]="sliderValue1" tabindex="0">
@@ -52,7 +53,7 @@ class SliderElement {
 
 @Component(
     selector: '.mdl-slider__container', template: '<ng-content></ng-content>')
-class Slider implements AfterContentInit {
+class Slider implements AfterContentInit, OnDestroy {
   @ContentChild(SliderElement) SliderElement sliderElement;
   @ContentChild(SliderBackgroundLower) SliderBackgroundLower backgroundLower;
   @ContentChild(SliderBackgroundUpper) SliderBackgroundUpper backgroundUpper;
@@ -62,19 +63,22 @@ class Slider implements AfterContentInit {
   num min;
   num value;
 
+  List<StreamSubscription> subscriptions = [];
+
   void ngAfterContentInit() {
     if (sliderElement != null) {
       max = asNumber(sliderElement.max);
       min = asNumber(sliderElement.min);
       value = asNumber(sliderElement.value);
+      setSliderValues();
     }
     if (ngModelInput != null) {
       value = asNumber(ngModelInput.value);
       setSliderValues();
-      ngModelInput.update.listen((dynamic newValue) {
+      subscriptions.add(ngModelInput.update.listen((dynamic newValue) {
         value = asNumber(newValue);
         setSliderValues();
-      });
+      }));
     }
   }
 
@@ -82,6 +86,13 @@ class Slider implements AfterContentInit {
     num fraction = (value - min) / (max - min);
     backgroundLower.flex = '$fraction';
     backgroundUpper.flex = '${1.0 - fraction}';
+  }
+
+  void ngOnDestroy() {
+    for (StreamSubscription subscription in subscriptions) {
+      subscription.cancel();
+    }
+    subscriptions.clear();
   }
 }
 
