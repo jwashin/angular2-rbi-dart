@@ -1,5 +1,10 @@
-import 'package:barback/barback.dart';
+/// probably not very efficient, but works.
+/// angular2_rbi transformer goes before angular2 transformer in pubspec.yaml
+/// only works on .html files, not templates in .dart files
+/// only necessary for slider
+
 import 'dart:async';
+import 'package:barback/barback.dart';
 
 class UpdateHtml extends Transformer {
   UpdateHtml.asPlugin();
