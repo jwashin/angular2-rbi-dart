@@ -18,13 +18,3 @@ class FocusSource {
   @HostListener('blur')
   void onBlur() => hasFocus.add(false);
 }
-//
-//
-//@Directive(selector:'textarea.mdl-textfield')
-//class TextAreaField{
-//}
-//
-//@Directive(selector:'input[type=text].mdl-textfield')
-//class TextInputField{
-//  @Input() int maxrows;
-//}
