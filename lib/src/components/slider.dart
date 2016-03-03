@@ -1,4 +1,5 @@
 import 'dart:html';
+import 'dart:async';
 
 import 'package:angular2/angular2.dart';
 
@@ -13,15 +14,19 @@ import 'package:angular2/angular2.dart';
 ///
 ///     use e.g., `[(ngModel)]="someVariable"` to operate on the value.
 ///
-///       `<input class="mdl-slider mdl-slider" type="range" min="0"
+///       `<input class="mdl-slider" type="range" min="0"
 ///       max="100" [(ngModel)]="sliderValue1" tabindex="0">
 ///       <p>{{sliderValue1}}</p>`
 ///
 ///       `int sliderValue1 = 0;`
 ///
 
-@Directive(selector: '.mdl-js-slider')
-class Slider implements OnInit, AfterContentInit {
+num asNumber(dynamic aValue) {
+  return aValue is String ? num.parse(aValue) : aValue;
+}
+
+@Directive(selector: '.mdl-slider')
+class SliderElement implements OnChanges {
   @Input() dynamic min = 0;
   @Input() dynamic max = 100;
   @Input() dynamic value = 0;
@@ -38,54 +43,65 @@ class Slider implements OnInit, AfterContentInit {
   @HostListener('mouseup', const ['\$event.target'])
   void onMouseUp(InputElement target) => target.blur();
 
-  ElementRef _ref;
-  Renderer _renderer;
+//  @Output() EventEmitter<num> newValue = new EventEmitter();
 
-  Element backgroundLower;
-  Element backgroundUpper;
-
-  Slider(this._ref, this._renderer);
-
-  void ngOnInit() {
-    // we do this here instead of a template because we have to enclose
-    // the host input element in another element, then make new elements
-    // siblings instead of children of the host input
-    InputElement hostElement = _ref.nativeElement;
-    Element parent = hostElement.parent;
-    Element container = _renderer.createElement(parent, 'div');
-    _renderer.setElementClass(container, 'mdl-slider__container', true);
-    parent.insertBefore(container, hostElement);
-    container.append(hostElement);
-    Element backgroundFlex = _renderer.createElement(container, 'div');
-    _renderer.setElementClass(
-        backgroundFlex, 'mdl-slider__background-flex', true);
-    backgroundLower = _renderer.createElement(container, 'div');
-    _renderer.setElementClass(
-        backgroundLower, 'mdl-slider__background-lower', true);
-    backgroundUpper = _renderer.createElement(container, 'div');
-    _renderer.setElementClass(
-        backgroundUpper, 'mdl-slider__background-upper', true);
-    backgroundFlex.append(backgroundLower);
-    backgroundFlex.append(backgroundUpper);
-    container.append(backgroundFlex);
-  }
-
-  num asNumber(dynamic aValue) {
-    return aValue is String ? num.parse(aValue) : aValue;
+  void ngOnChanges(Map<String, SimpleChange> changes) {
+    print('changes: ${changes.keys}');
+//    print ('new value: ${changes['value'].currentValue}');
+    Timer.run(() => updateValueAndStyles(value));
   }
 
   void updateValueAndStyles(dynamic inputValue) {
     value = inputValue;
     num calcValue = asNumber(inputValue);
     num calcMin = asNumber(min);
-    num calcMax = asNumber(max);
     valueIsLowestValue = calcValue == calcMin;
-    num fraction = (calcValue - calcMin) / (calcMax - calcMin);
-    backgroundLower.style.setProperty('flex', '$fraction');
-    backgroundUpper.style.setProperty('flex', '${1.0 - fraction}');
   }
+}
+
+@Component(
+    selector: '.mdl-slider__container', template: '<ng-content></ng-content>')
+class Slider implements AfterContentInit {
+  @ContentChild(SliderElement) SliderElement sliderElement;
+  @ContentChild(SliderBackgroundLower) SliderBackgroundLower backgroundLower;
+  @ContentChild(SliderBackgroundUpper) SliderBackgroundUpper backgroundUpper;
+  @ContentChild(NgModel) NgModel ngModelInput;
+
+  num max;
+  num min;
+  num value;
 
   void ngAfterContentInit() {
-    updateValueAndStyles(_ref.nativeElement.value);
+    if (sliderElement != null) {
+      max = asNumber(sliderElement.max);
+      min = asNumber(sliderElement.min);
+      value = asNumber(sliderElement.value);
+//      setSliderValues();
+      print('we have slider element $min, $max, $value');
+    }
+    if (ngModelInput != null) {
+      value = asNumber(ngModelInput.value);
+      setSliderValues();
+      ngModelInput.update.listen((dynamic newValue) {
+        value = asNumber(newValue);
+        setSliderValues();
+      });
+    }
   }
+
+  void setSliderValues() {
+    num fraction = (value - min) / (max - min);
+    backgroundLower.flex = '$fraction';
+    backgroundUpper.flex = '${1.0 - fraction}';
+  }
+}
+
+@Directive(selector: '.mdl-slider__background-lower')
+class SliderBackgroundLower {
+  @HostBinding('style.flex') String flex = '';
+}
+
+@Directive(selector: '.mdl-slider__background-upper')
+class SliderBackgroundUpper {
+  @HostBinding('style.flex') String flex = '';
 }
