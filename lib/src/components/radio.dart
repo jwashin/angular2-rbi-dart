@@ -30,7 +30,7 @@ class Radio implements OnInit, AfterContentInit {
   @HostBinding('class.is-focused') bool isFocused = false;
 
   @ContentChild(FocusSource) FocusSource radioInput;
-  @ContentChild(DisabledInput) DisabledInput disabledInput;
+  @ContentChildren(DisabledInput) QueryList<DisabledInput> disabledInput;
   @ContentChild(NgModel) NgModel ngModelInput;
 
   @HostListener('mouseup')
@@ -41,7 +41,7 @@ class Radio implements OnInit, AfterContentInit {
   }
 
   RadioNotifier checkedNotifier = radioNotifier;
-  String name;
+  String name = '';
 
   void ngOnInit() {
     checkedNotifier.newlyChecked.listen((Radio radio) {
@@ -65,8 +65,13 @@ class Radio implements OnInit, AfterContentInit {
         checkedNotifier.newCheck(this);
       });
     }
-    if (disabledInput != null) {
+    if (disabledInput.isNotEmpty) {
       isDisabled = true;
     }
+    disabledInput.changes.listen((_) {
+      if (disabledInput.isNotEmpty) {
+        isDisabled = true;
+      }
+    });
   }
 }
