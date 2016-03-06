@@ -12,7 +12,7 @@ import 'ripple.dart';
         '<span *ngIf="ripple" class="mdl-button__ripple-container"></span>',
     directives: const [NgIf, RippleContainer])
 class Button {
-  @Input bool ripple = false;
+  @Input() bool ripple = false;
 
   @HostListener('mouseup', const ['\$event.target'])
   void onMouseUp(Element target) {
