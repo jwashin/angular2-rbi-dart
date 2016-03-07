@@ -1,0 +1,29 @@
+<!-- two elements to patch into a single component -->
+
+<new-div>
+  <button id="demo-menu-lower-left"
+          class="mdl-button mdl-js-button mdl-button--icon">
+    <i class="material-icons">more_vert</i>
+  </button>
+  <div class="mdl-menu__container is-upgraded">
+    <div
+        class="mdl-menu__outline mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect"></div>
+    #
+    <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect mdl-js-ripple-effect--ignore-events"
+        for="demo-menu-lower-left">
+      <li class="mdl-menu__item mdl-js-ripple-effect" tabindex="-1">Some
+        Action<span class="mdl-menu__item-ripple-container"><span
+            class="mdl-ripple"></span></span></li>
+      <li class="mdl-menu__item mdl-menu__item--full-bleed-divider mdl-js-ripple-effect"
+          tabindex="-1">Another Action<span
+          class="mdl-menu__item-ripple-container"><span
+          class="mdl-ripple"></span></span></li>
+      <li disabled="" class="mdl-menu__item mdl-js-ripple-effect" tabindex="-1">
+        Disabled Action<span class="mdl-menu__item-ripple-container"><span
+          class="mdl-ripple"></span></span></li>
+      <li class="mdl-menu__item mdl-js-ripple-effect" tabindex="-1">Yet Another
+        Action<span class="mdl-menu__item-ripple-container"><span
+            class="mdl-ripple"></span></span></li>
+    </ul>
+  </div>
+</new-div>

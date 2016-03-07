@@ -16,19 +16,19 @@ import 'ripple.dart';
 <div class="mdl-switch__thumb">
   <span class="mdl-switch__focus-helper"></span>
 </div>
-<span class="mdl-switch__ripple-container">
+<span class="mdl-switch__ripple-container" [centered]="true">
 </span>
 ''',
-    directives: const [CenteredRippleContainer])
+    directives: const [RippleContainer])
 class Switch implements AfterContentInit, OnDestroy {
-  @HostBinding('class.is-checked') bool isChecked;
+  @HostBinding('class.is-checked') bool isChecked = false;
   @HostBinding('class.is-upgraded') bool isUpgraded = true;
   @HostBinding('class.is-disabled') bool isDisabled = false;
   @HostBinding('class.is-focused') bool isFocused = false;
 
   @ContentChild(FocusSource) FocusSource checkboxInput;
   @ContentChild(NgModel) NgModel ngModelInput;
-  @ContentChild(DisabledInput) DisabledInput disabledInput;
+  @ContentChildren(DisabledInput) QueryList<DisabledInput> disabledInput;
 
   List<StreamSubscription> subscriptions = [];
 
@@ -47,13 +47,18 @@ class Switch implements AfterContentInit, OnDestroy {
           checkboxInput.hasFocus.listen((bool event) => isFocused = event));
     }
     if (ngModelInput != null) {
-      isChecked = ngModelInput.value;
+      Timer.run(() => isChecked = ngModelInput.value);
       subscriptions.add(
           ngModelInput.update.listen((bool newValue) => isChecked = newValue));
     }
-    if (disabledInput != null) {
-      isDisabled = true;
+    if (disabledInput.isNotEmpty) {
+      Timer.run(() => isDisabled = true);
     }
+    disabledInput.changes.listen((_) {
+      if (disabledInput.isNotEmpty) {
+        isDisabled = true;
+      }
+    });
   }
 
   void ngOnDestroy() {

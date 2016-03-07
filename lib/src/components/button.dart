@@ -7,7 +7,7 @@ import 'package:angular2/angular2.dart';
 import 'ripple.dart';
 
 @Component(
-    selector: 'button.mdl-button.mdl-js-ripple-effect',
+    selector: 'button.mdl-button',
     template: '<ng-content></ng-content>'
         '<span *ngIf="ripple" class="mdl-button__ripple-container"></span>',
     directives: const [NgIf, RippleContainer])

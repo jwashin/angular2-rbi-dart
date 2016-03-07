@@ -19,12 +19,11 @@ RadioNotifier radioNotifier = new RadioNotifier();
     <ng-content></ng-content>
     <span class="mdl-radio__outer-circle"></span>
     <span class="mdl-radio__inner-circle"></span>
-    <span class="mdl-radio__ripple-container"></span>
-
+    <span class="mdl-radio__ripple-container" [centered]="true"></span>
     ''',
-    directives: const [CenteredRippleContainer])
+    directives: const [RippleContainer])
 class Radio implements OnInit, AfterContentInit, OnDestroy {
-  @HostBinding('class.is-checked') bool isChecked;
+  @HostBinding('class.is-checked') bool isChecked = false;
   @HostBinding('class.is-upgraded') bool isUpgraded = true;
   @HostBinding('class.is-disabled') bool isDisabled = false;
   @HostBinding('class.is-focused') bool isFocused = false;
@@ -61,7 +60,7 @@ class Radio implements OnInit, AfterContentInit, OnDestroy {
           .add(radioInput.hasFocus.listen((bool event) => isFocused = event));
     }
     if (ngModelInput != null) {
-      isChecked = ngModelInput.value.checked;
+      Timer.run(() => isChecked = ngModelInput.value.checked);
       name = ngModelInput.name;
       subscriptions.add(ngModelInput.update.listen((RadioButtonState newValue) {
         isChecked = newValue.checked;
@@ -69,13 +68,13 @@ class Radio implements OnInit, AfterContentInit, OnDestroy {
       }));
     }
     if (disabledInput.isNotEmpty) {
-      isDisabled = true;
+      Timer.run(() => isDisabled = true);
     }
-    subscriptions.add(disabledInput.changes.listen((_) {
+    disabledInput.changes.listen((_) {
       if (disabledInput.isNotEmpty) {
         isDisabled = true;
       }
-    }));
+    });
   }
 
   void ngOnDestroy() {

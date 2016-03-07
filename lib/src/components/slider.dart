@@ -59,22 +59,23 @@ class Slider implements AfterContentInit, OnDestroy {
   @ContentChild(SliderBackgroundUpper) SliderBackgroundUpper backgroundUpper;
   @ContentChild(NgModel) NgModel ngModelInput;
 
-  num max;
-  num min;
-  num value;
+  num max = 0;
+  num min = 100;
+  num value = 0;
 
   List<StreamSubscription> subscriptions = [];
 
   void ngAfterContentInit() {
     if (sliderElement != null) {
-      max = asNumber(sliderElement.max);
       min = asNumber(sliderElement.min);
-      value = asNumber(sliderElement.value);
-      setSliderValues();
+      max = asNumber(sliderElement.max);
     }
+
     if (ngModelInput != null) {
-      value = asNumber(ngModelInput.value);
-      setSliderValues();
+      Timer.run(() {
+        value = asNumber(ngModelInput.value);
+        setSliderValues();
+      });
       subscriptions.add(ngModelInput.update.listen((dynamic newValue) {
         value = asNumber(newValue);
         setSliderValues();
@@ -98,10 +99,10 @@ class Slider implements AfterContentInit, OnDestroy {
 
 @Directive(selector: '.mdl-slider__background-lower')
 class SliderBackgroundLower {
-  @HostBinding('style.flex') String flex = '';
+  @HostBinding('style.flex') String flex = '0.0';
 }
 
 @Directive(selector: '.mdl-slider__background-upper')
 class SliderBackgroundUpper {
-  @HostBinding('style.flex') String flex = '';
+  @HostBinding('style.flex') String flex = '1.0';
 }

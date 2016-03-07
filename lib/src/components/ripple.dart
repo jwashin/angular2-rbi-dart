@@ -35,15 +35,16 @@ class RippleContainer {
 
   @HostListener('mousedown', const ['\$event.client', '\$event.target'])
   void onMouseDown(Point clickPoint, Element rippleContainer) {
-    Rectangle rect = rippleContainer.getBoundingClientRect();
+    Rectangle containerRect = rippleContainer.getBoundingClientRect();
     rippleSize = '${
-        sqrt(rect.width * rect.width + rect.height * rect.height) * 2 + 2}px';
+        (sqrt(containerRect.width * containerRect.width
+            + containerRect.height * containerRect.height) * 2 + 2).round()}px';
     if (centered) {
-      rippleX = '${(rect.right - rect.left) / 2}px';
-      rippleY = '${(rect.bottom - rect.top) / 2}px';
+      rippleX = '${(containerRect.right - containerRect.left) / 2}px';
+      rippleY = '${(containerRect.bottom - containerRect.top) / 2}px';
     } else {
-      rippleY = '${clickPoint.y - rect.top}px';
-      rippleX = '${clickPoint.x - rect.left}px';
+      rippleY = '${clickPoint.y - containerRect.top}px';
+      rippleX = '${clickPoint.x - containerRect.left}px';
     }
     active = true;
   }
