@@ -22,7 +22,7 @@ import 'package:angular2/angular2.dart';
           'transition: all 0.6s cubic-bezier(0, 0, 0.2, 1);}',
       '.mdl-ripple.ng-enter {opacity: 0;'
           'transform: translate(-50%, -50%) scale(0.0001);}',
-      '.mdl-ripple.ng-enter-active {opacity: .8;'
+      '.mdl-ripple.ng-enter-active {opacity: .4;'
           'transform: translate(-50%, -50%) scale(1);}'
     ],
     directives: const [
@@ -34,12 +34,14 @@ class RippleContainer {
   String rippleX, rippleY, rippleSize;
 
   @HostListener('mousedown', const ['\$event.client', '\$event.target'])
-  void onMouseDown(Point clickPoint, Element rippleContainer) {
+  void onMouseDown(Point clickPoint, Element rippleContainer, [bool center]) {
     Rectangle containerRect = rippleContainer.getBoundingClientRect();
     rippleSize = '${
         (sqrt(containerRect.width * containerRect.width
             + containerRect.height * containerRect.height) * 2 + 2).round()}px';
-    if (centered) {
+    bool centerRipple =
+    center == null ? centered : center;
+    if (centerRipple) {
       rippleX = '${(containerRect.right - containerRect.left) / 2}px';
       rippleY = '${(containerRect.bottom - containerRect.top) / 2}px';
     } else {
