@@ -132,21 +132,21 @@ class MenuButton {
 //        '</div>'
         '</div>',
     styles: const [
-      'rbi-menu-container{transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);position:absolute;}',
-      '.mdl-menu__outline{height:auto;width:auto;overflow:auto;position:static;}',
-      '.mdl-menu__container{height:200px;width:200px;z-index:999;}',
-      '.mdl-menu{z-index:1000;clip:auto;position:static;}',
+//      'rbi-menu-container{transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);position:absolute;}',
+//      '.mdl-menu__outline{height:auto;width:auto;overflow:auto;position:static;}',
+//      '.mdl-menu__container{height:200px;width:200px;z-index:999;}',
+      '.rbi-menu{clip: initial;}',
     ],
     directives: const [
-      NgIf
+      NgIf,
+      RippleContainer
     ])
 class Menu implements AfterContentInit, OnDestroy {
   @Input() String projection = '';
   @Input() bool ripple = false;
-
   @HostBinding('class.mdl-menu__container') bool isMenuContainer = true;
   @HostBinding('class.is-visible') bool isVisible = true;
-  @HostBinding('class.is-animating') bool isAnimating = true;
+  @HostBinding('class.is-animating') bool isAnimating = false;
 
   @ContentChildren(MenuItem) QueryList<MenuItem> menuItems;
 
@@ -172,27 +172,7 @@ class Menu implements AfterContentInit, OnDestroy {
 
   void setTransitions() {}
 
-  void ngAfterContentInit() {
-    subscriptions.add(menuItems.changes.listen((_) {
-      menuItemCount = 0;
-      for (MenuItem item in menuItems) {
-        menuItemCount += 1;
-        if (ripple) {
-          item.ripple = true;
-        }
-      }
-    }));
-
-//    for (MenuItem item in menuItems) {
-//      if (ripple) {
-//        item.ripple = true;
-//      }
-//      menuItemCount += 1;
-//      subscriptions.add(item.menuItemClicked.listen((_) {
-//        menuItemClicked();
-//      }));
-//    }
-  }
+  void ngAfterContentInit() {}
 
   void ngOnDestroy() {
     for (StreamSubscription subscription in subscriptions) {
@@ -206,19 +186,32 @@ class Menu implements AfterContentInit, OnDestroy {
 class MdlMenu {
   @HostBinding('class.is-animating') bool isAnimating = true;
   @HostBinding('class.is-visible') bool isVisible = true;
+  @HostBinding('class.rbi-menu') bool isRbi = true;
+  @HostBinding('style.clip') String clip = 'initial';
+  @HostBinding('style.position') String position = 'relative';
 }
 
-@Component(
-    selector: '.mdl-menu__item',
-    template: '<ng-content></ng-content>'
-        '<span *ngIf="ripple" class="mdl-menu__item-ripple-container"></span>',
-    directives: const [NgIf, RippleContainer])
+@Component(selector: '.mdl-menu__item', template: '<ng-content></ng-content>')
 class MenuItem {
   @Input() String disabled;
-  @Input() bool ripple = false;
   @Attribute('tabindex') String tabIndex = '-1';
   @HostBinding('style.transition-delay') String transitionDelay = '';
+  @ContentChild(RippleContainer) RippleContainer ripple;
   @Output() EventEmitter<bool> menuItemClicked = new EventEmitter();
+
+  @HostListener('mousedown', const ['\$event.client', '\$event.target'])
+  void onMouseDown(Point client, Element target) {
+    if (ripple != null) {
+      ripple.onMouseDown(client, target);
+    }
+  }
+
+  @HostListener('mouseup')
+  void onMouseUp() {
+    if (ripple != null) {
+      ripple.onMouseUp();
+    }
+  }
 
   @HostListener('click')
   void onClick() => menuItemClicked.add(true);

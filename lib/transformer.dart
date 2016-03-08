@@ -41,6 +41,7 @@ class UpdateHtml extends Transformer {
   void fixMenus() {
     List<Element> menus = document.querySelectorAll('ul.mdl-js-menu');
     String projection;
+    Element parent;
     for (Element element in menus) {
       for (String className in element.classes) {
         if (className.startsWith('mdl-menu--')) {
@@ -48,7 +49,7 @@ class UpdateHtml extends Transformer {
         }
       }
       String elFor;
-      for (String attr in ['mdl-for', 'for', 'data-for']) {
+      for (String attr in ['data-mdl-for', 'for', 'data-for']) {
         elFor = element.attributes[attr];
         if (elFor != null && elFor.isNotEmpty) {
           break;
@@ -61,7 +62,7 @@ class UpdateHtml extends Transformer {
       bool hasPrevButton =
           prevButton != null && prevButton.localName == 'button';
       if (hasPrevButton) {
-        Element parent = prevButton.parent;
+        parent = prevButton.parent;
         Element newDiv = new Element.tag('rbi-menu-manager');
         parent.insertBefore(newDiv, prevButton);
         Element buttonContainer = new Element.tag('rbi-menu-button');
@@ -69,8 +70,14 @@ class UpdateHtml extends Transformer {
         newDiv.append(buttonContainer);
         Element menuContainer = new Element.tag('rbi-menu-container');
         menuContainer.attributes.addAll({'[projection]': projection});
-        if (element.classes.contains('mdl-js-ripple-effect')) {
+        bool rippling = element.classes.contains('mdl-js-ripple-effect');
+        if (rippling) {
           menuContainer.attributes.addAll({'[ripple]': 'true'});
+          for (Element li in element.querySelectorAll('.mdl-menu__item')) {
+            Element s = new Element.tag('span');
+            s.classes.add('mdl-menu__item-ripple-container');
+            li.append(s);
+          }
         }
         menuContainer.append(element);
         newDiv.append(menuContainer);
