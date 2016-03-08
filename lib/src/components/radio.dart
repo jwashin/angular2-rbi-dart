@@ -21,7 +21,7 @@ RadioNotifier radioNotifier = new RadioNotifier();
     <span class="mdl-radio__inner-circle"></span>
     <span class="mdl-radio__ripple-container" [centered]="true"></span>
     ''',
-    directives: const [RippleContainer])
+    directives: const [Ripple])
 class Radio implements OnInit, AfterContentInit, OnDestroy {
   @HostBinding('class.is-checked') bool isChecked = false;
   @HostBinding('class.is-upgraded') bool isUpgraded = true;

@@ -25,7 +25,7 @@ const List<Type> rbiComponents = const [
   DisabledInput,
   FocusSource,
   Checkbox,
-  RippleContainer,
+  Ripple,
   Slider,
   SliderBackgroundUpper,
   SliderBackgroundLower,

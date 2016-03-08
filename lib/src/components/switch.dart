@@ -19,7 +19,7 @@ import 'ripple.dart';
 <span class="mdl-switch__ripple-container" [centered]="true">
 </span>
 ''',
-    directives: const [RippleContainer])
+    directives: const [Ripple])
 class Switch implements AfterContentInit, OnDestroy {
   @HostBinding('class.is-checked') bool isChecked = false;
   @HostBinding('class.is-upgraded') bool isUpgraded = true;

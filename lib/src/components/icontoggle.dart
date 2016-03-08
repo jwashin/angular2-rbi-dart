@@ -11,7 +11,7 @@ import 'ripple.dart';
 <ng-content></ng-content>
 <span class="mdl-icon-toggle__ripple-container" [centered]="true"></span>
 ''',
-    directives: const [NgIf, RippleContainer])
+    directives: const [NgIf, Ripple])
 class IconToggle implements AfterContentInit, OnDestroy {
   @Input('class') String hostClasses;
   @HostBinding('class.is-checked') bool isChecked = false;

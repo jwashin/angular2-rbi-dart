@@ -19,7 +19,7 @@ import 'package:angular2/angular2.dart';
         '></span>',
     styles: const [
       '.mdl-ripple {transform: translate(-50%, -50%) scale(1);'
-          'transition: all 0.6s cubic-bezier(0, 0, 0.2, 1);}',
+          'transition: all 0.5s cubic-bezier(0, 0, 0.2, 1);}',
       '.mdl-ripple.ng-enter {opacity: 0;'
           'transform: translate(-50%, -50%) scale(0.0001);}',
       '.mdl-ripple.ng-enter-active {opacity: .4;'
@@ -28,19 +28,21 @@ import 'package:angular2/angular2.dart';
     directives: const [
       NgIf
     ])
-class RippleContainer {
+class Ripple {
   @Input() bool centered = false;
   bool active = false;
   String rippleX, rippleY, rippleSize;
 
   @HostListener('mousedown', const ['\$event.client', '\$event.target'])
-  void onMouseDown(Point clickPoint, Element rippleContainer, [bool center]) {
-    Rectangle containerRect = rippleContainer.getBoundingClientRect();
+
+  /// Calculate center of the ripple effect and activate it.
+  void onMouseDown(Point clickPoint, Element rippleTarget,
+      [bool centerOnTarget]) {
+    Rectangle containerRect = rippleTarget.getBoundingClientRect();
     rippleSize = '${
         (sqrt(containerRect.width * containerRect.width
             + containerRect.height * containerRect.height) * 2 + 2).round()}px';
-    bool centerRipple =
-    center == null ? centered : center;
+    bool centerRipple = centerOnTarget == null ? centered : centerOnTarget;
     if (centerRipple) {
       rippleX = '${(containerRect.right - containerRect.left) / 2}px';
       rippleY = '${(containerRect.bottom - containerRect.top) / 2}px';

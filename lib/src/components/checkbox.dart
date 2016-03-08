@@ -18,7 +18,7 @@ import 'input_directives.dart';
 </span>
 <span class="mdl-checkbox__ripple-container" [centered]="true"></span>
 ''',
-    directives: const [RippleContainer])
+    directives: const [Ripple])
 class Checkbox implements AfterContentInit, OnDestroy {
   @HostBinding('class.is-checked') bool isChecked = false;
   @HostBinding('class.is-upgraded') bool isUpgraded = true;

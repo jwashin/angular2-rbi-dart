@@ -10,7 +10,7 @@ import 'ripple.dart';
     selector: 'button.mdl-button',
     template: '<ng-content></ng-content>'
         '<span *ngIf="ripple" class="mdl-button__ripple-container"></span>',
-    directives: const [NgIf, RippleContainer])
+    directives: const [NgIf, Ripple])
 class Button {
   @Input() bool ripple = false;
 

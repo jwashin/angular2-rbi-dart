@@ -1,8 +1,10 @@
-/// probably not very efficient, but works.
+/// This is where we do things to MDL source that would otherwise require
+/// special DOM manipulation for within Angular2.
+/// It's probably not very efficient.
 /// DO NOT USE with directives side of this project.
 /// "angular2_rbi" transformer goes before angular2 transformer in pubspec.yaml
 /// only works on .html files, not templates in .dart files
-/// only needed for Component version of button, slider, menu
+/// required only for Component version of button, slider, menu
 
 import 'dart:async';
 import 'package:html/parser.dart';
@@ -18,7 +20,7 @@ class UpdateHtml extends Transformer {
 
   Future apply(Transform transform) async {
     String content = await transform.primaryInput.readAsString();
-    // use lowercaseAttrName so that [(ngModel)] doesn't become [(ngmodel)]
+    // lowercaseAttrName: false so [(ngModel)] doesn't become [(ngmodel)]
     HtmlParser parser = new HtmlParser(content, lowercaseAttrName: false);
     document = parser.parse();
     fixMenus();
@@ -28,10 +30,9 @@ class UpdateHtml extends Transformer {
     transform.addOutput(new Asset.fromString(id, document.outerHtml));
   }
 
+  /// Convert mdl-js-ripple-effect class into ripple attribute.
   void fixButtons() {
-    // just so we don't don't need Button and ButtonNoRipple classes
     List<Element> buttons = document.querySelectorAll('button.mdl-button');
-//    print('buttons: ${buttons.length}');
     for (Element button in buttons) {
       if (button.classes.contains('mdl-js-ripple-effect')) {
         button.attributes.addAll({'[ripple]': 'true'});
@@ -39,16 +40,34 @@ class UpdateHtml extends Transformer {
     }
   }
 
+  Element cloneWithNewTag(Element element, String newTag) {
+    Element newElement = new Element.tag(newTag);
+    newElement.classes.addAll(element.classes);
+    for (Node node in element.nodes) {
+      Node newNode = node.clone(true);
+      newElement.nodes.add(newNode);
+    }
+    return newElement;
+  }
+
+  /// Repackage menu: do the class queries and containerize.
   void fixMenus() {
     List<Element> menus = document.querySelectorAll('ul.mdl-js-menu');
     String projection;
-    Element parent;
+    String className;
     for (Element element in menus) {
-      for (String className in element.classes) {
+      for (className in element.classes) {
         if (className.startsWith('mdl-menu--')) {
           projection = "'${className.split('--')[1]}'";
+
+          break;
         }
       }
+      if (element.classes.contains(className)) {
+        element.classes.remove(className);
+      }
+      element.classes.remove('mdl-menu');
+      element.classes.add('rbi-menu');
       String elFor;
       for (String attr in ['data-mdl-for', 'for', 'data-for']) {
         elFor = element.attributes[attr];
@@ -63,29 +82,45 @@ class UpdateHtml extends Transformer {
       bool hasPrevButton =
           prevButton != null && prevButton.localName == 'button';
       if (hasPrevButton) {
-        parent = prevButton.parent;
-        Element newDiv = new Element.tag('rbi-menu-manager');
-        parent.insertBefore(newDiv, prevButton);
+        Element parent = prevButton.parent;
         Element buttonContainer = new Element.tag('rbi-menu-button');
+        buttonContainer.attributes.addAll({'[buttonId]': "\'$elFor\'"});
         buttonContainer.append(prevButton);
-        newDiv.append(buttonContainer);
+        parent.append(buttonContainer);
         Element menuContainer = new Element.tag('rbi-menu-container');
-        menuContainer.attributes.addAll({'[projection]': projection});
+        menuContainer.attributes
+            .addAll({'[projection]': projection, '[buttonId]': "\'$elFor\'"});
         bool rippling = element.classes.contains('mdl-js-ripple-effect');
-        if (rippling) {
-          menuContainer.attributes.addAll({'[ripple]': 'true'});
-          for (Element li in element.querySelectorAll('.mdl-menu__item')) {
+        for (Element li in element.querySelectorAll('.mdl-menu__item')) {
+          li.classes.add('rbi-menu-item');
+          li.classes.remove('mdl-menu__item');
+          if (rippling) {
             Element s = new Element.tag('span');
             s.classes.add('mdl-menu__item-ripple-container');
             li.append(s);
           }
+          Element liContainer = new Element.tag('rbi-menu-item');
+          Element newElement = cloneWithNewTag(li, 'div');
+          liContainer.append(newElement);
+          li.remove();
+          element.append(liContainer);
         }
-        menuContainer.append(element);
-        newDiv.append(menuContainer);
+        element.parent.append(menuContainer);
+        // clone and re-tag element ul has ugly 40px default left padding
+        Element newElement = new Element.tag('div');
+        newElement.classes.addAll(element.classes);
+        for (Node node in element.nodes) {
+          Node newNode = node.clone(true);
+          newElement.nodes.add(newNode);
+        }
+//        element.parent.append(newElement);
+        element.remove();
+        menuContainer.append(newElement);
       }
     }
   }
 
+  /// MDL slider input gets a container and new tags for display.
   void fixSliders() {
     List<Element> sliders = document.querySelectorAll('.mdl-slider');
     for (Element element in sliders) {
