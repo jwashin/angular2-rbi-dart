@@ -1,7 +1,8 @@
 /// probably not very efficient, but works.
-/// angular2_rbi transformer goes before angular2 transformer in pubspec.yaml
+/// DO NOT USE with directives side of this project.
+/// "angular2_rbi" transformer goes before angular2 transformer in pubspec.yaml
 /// only works on .html files, not templates in .dart files
-/// only necessary for slider, menu
+/// only needed for Component version of button, slider, menu
 
 import 'dart:async';
 import 'package:html/parser.dart';
