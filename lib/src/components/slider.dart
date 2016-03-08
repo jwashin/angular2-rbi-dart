@@ -72,6 +72,7 @@ class Slider implements AfterContentInit, OnDestroy {
     }
 
     if (ngModelInput != null) {
+      // Timer is a hack for displaying an initial value properly
       Timer.run(() {
         value = asNumber(ngModelInput.value);
         setSliderValues();
