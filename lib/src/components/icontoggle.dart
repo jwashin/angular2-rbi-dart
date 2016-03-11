@@ -13,16 +13,22 @@ import 'ripple.dart';
 ''',
     directives: const [NgIf, Ripple])
 class IconToggle implements AfterContentInit, OnDestroy {
-  @Input('class') String hostClasses;
-  @HostBinding('class.is-checked') bool isChecked = false;
-  @HostBinding('class.is-upgraded') bool isUpgraded = true;
-  @HostBinding('class.is-disabled') bool isDisabled = false;
-  @HostBinding('class.is-focused') bool isFocused = false;
-  @ContentChild(NgModel) NgModel ngModelInput;
-  @ContentChild(FocusSource) FocusSource checkboxInput;
-  @ContentChildren(DisabledInput) QueryList<DisabledInput> disabledInput;
+  @Input('class')
+  String hostClasses;
+  @HostBinding('class.is-checked')
+  bool isChecked = false;
+  @HostBinding('class.is-upgraded')
+  bool isUpgraded = true;
+  @HostBinding('class.is-disabled')
+  bool isDisabled = false;
+  @HostBinding('class.is-focused')
+  bool isFocused = false;
+  @ContentChild(NgModel)
+  NgModel ngModelInput;
+  @ContentChild(InputSource)
+  InputSource checkboxInput;
 
-  List<StreamSubscription> subscriptions = [];
+  List<StreamSubscription<bool>> subscriptions = [];
 
   @HostListener('mouseup')
   void onMouseUp() {
@@ -33,27 +39,22 @@ class IconToggle implements AfterContentInit, OnDestroy {
 
   void ngAfterContentInit() {
     //set listeners on the checkbox properties
+
     if (checkboxInput != null) {
       subscriptions.add(
           checkboxInput.hasFocus.listen((bool event) => isFocused = event));
+    } else {
+      Timer.run(() => isDisabled = true);
     }
     if (ngModelInput != null) {
       Timer.run(() => isChecked = ngModelInput.value);
       subscriptions.add(
           ngModelInput.update.listen((bool newValue) => isChecked = newValue));
     }
-    if (disabledInput.isNotEmpty) {
-      Timer.run(() => isDisabled = true);
-    }
-    disabledInput.changes.listen((_) {
-      if (disabledInput.isNotEmpty) {
-        isDisabled = true;
-      }
-    });
   }
 
   void ngOnDestroy() {
-    for (StreamSubscription subscription in subscriptions) {
+    for (StreamSubscription<bool> subscription in subscriptions) {
       subscription.cancel();
     }
     subscriptions.clear();

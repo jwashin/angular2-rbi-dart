@@ -4,7 +4,7 @@ import 'ripple.dart';
 import 'input_directives.dart';
 
 class RadioNotifier {
-  EventEmitter<Radio> newlyChecked = new EventEmitter();
+  EventEmitter<Radio> newlyChecked = new EventEmitter<Radio>();
 
   void newCheck(Radio radio) {
     newlyChecked.add(radio);
@@ -23,16 +23,26 @@ RadioNotifier radioNotifier = new RadioNotifier();
     ''',
     directives: const [Ripple])
 class Radio implements OnInit, AfterContentInit, OnDestroy {
-  @HostBinding('class.is-checked') bool isChecked = false;
-  @HostBinding('class.is-upgraded') bool isUpgraded = true;
-  @HostBinding('class.is-disabled') bool isDisabled = false;
-  @HostBinding('class.is-focused') bool isFocused = false;
+//  @Input()
+//  String name = '';
 
-  @ContentChild(FocusSource) FocusSource radioInput;
-  @ContentChildren(DisabledInput) QueryList<DisabledInput> disabledInput;
-  @ContentChild(NgModel) NgModel ngModelInput;
+  @HostBinding('class.is-checked')
+  bool isChecked = false;
+  @HostBinding('class.is-upgraded')
+  bool isUpgraded = true;
+  @HostBinding('class.is-disabled')
+  bool isDisabled = false;
+  @HostBinding('class.is-focused')
+  bool isFocused = false;
 
-  List<StreamSubscription> subscriptions = [];
+  @ContentChild(InputSource)
+  InputSource radioInput;
+  @ContentChild(NgModel)
+  NgModel ngModelInput;
+
+  String name;
+
+  List<StreamSubscription<dynamic>> subscriptions = [];
 
   @HostListener('mouseup')
   void onMouseUp() {
@@ -42,14 +52,14 @@ class Radio implements OnInit, AfterContentInit, OnDestroy {
   }
 
   RadioNotifier checkedNotifier = radioNotifier;
-  String name = '';
 
   void ngOnInit() {
-    checkedNotifier.newlyChecked.listen((Radio radio) {
+    subscriptions.add(checkedNotifier.newlyChecked.listen((Radio radio) {
+//      print('my name is $name, and the other radio\'s name is ${radio.name}');
       if (radio.name == name && radio != this) {
         isChecked = false;
       }
-    });
+    }));
   }
 
   void ngAfterContentInit() {
@@ -58,27 +68,22 @@ class Radio implements OnInit, AfterContentInit, OnDestroy {
     if (radioInput != null) {
       subscriptions
           .add(radioInput.hasFocus.listen((bool event) => isFocused = event));
+      name = radioInput.name;
+    } else {
+      Timer.run(() => isDisabled = true);
     }
+
     if (ngModelInput != null) {
       Timer.run(() => isChecked = ngModelInput.value.checked);
-      name = ngModelInput.name;
       subscriptions.add(ngModelInput.update.listen((RadioButtonState newValue) {
         isChecked = newValue.checked;
         checkedNotifier.newCheck(this);
       }));
     }
-    if (disabledInput.isNotEmpty) {
-      Timer.run(() => isDisabled = true);
-    }
-    disabledInput.changes.listen((_) {
-      if (disabledInput.isNotEmpty) {
-        isDisabled = true;
-      }
-    });
   }
 
   void ngOnDestroy() {
-    for (StreamSubscription subscription in subscriptions) {
+    for (StreamSubscription<dynamic> subscription in subscriptions) {
       subscription.cancel();
     }
     subscriptions.clear();

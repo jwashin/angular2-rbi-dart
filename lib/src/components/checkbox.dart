@@ -1,6 +1,5 @@
 library component_checkbox;
 
-import 'dart:html';
 import 'dart:async';
 
 import 'package:angular2/angular2.dart';
@@ -19,16 +18,21 @@ import 'input_directives.dart';
 <span class="mdl-checkbox__ripple-container" [centered]="true"></span>
 ''',
     directives: const [Ripple])
-class Checkbox implements AfterContentInit, OnDestroy {
-  @HostBinding('class.is-checked') bool isChecked = false;
-  @HostBinding('class.is-upgraded') bool isUpgraded = true;
-  @HostBinding('class.is-focused') bool isFocused = false;
-  @HostBinding('class.is-disabled') bool isDisabled = false;
-  @ContentChild(NgModel) NgModel ngModelInput;
-  @ContentChild(FocusSource) FocusSource checkboxInput;
-  @ContentChildren(DisabledInput) QueryList<DisabledInput> disabledInput;
+class Checkbox implements AfterContentInit, OnDestroy, OnChanges {
+  @HostBinding('class.is-checked')
+  bool isChecked = false;
+  @HostBinding('class.is-upgraded')
+  bool isUpgraded = true;
+  @HostBinding('class.is-focused')
+  bool isFocused = false;
+  @HostBinding('class.is-disabled')
+  bool isDisabled = false;
+  @ContentChild(NgModel)
+  NgModel ngModelInput;
+  @ContentChild(InputSource)
+  InputSource checkboxInput;
 
-  List<StreamSubscription> subscriptions = [];
+  List<StreamSubscription<dynamic>> subscriptions = [];
 
   @HostListener('mouseup')
   void onMouseUp() {
@@ -37,8 +41,8 @@ class Checkbox implements AfterContentInit, OnDestroy {
     }
   }
 
-  @HostListener('mousedown', const ['\$event.client', '\$event.target'])
-  void onMouseDown(Point client, Element target) {
+  @HostListener('mousedown')
+  void onMouseDown() {
     if (checkboxInput != null) {
       Timer.run(() => checkboxInput.onFocus());
     }
@@ -53,22 +57,21 @@ class Checkbox implements AfterContentInit, OnDestroy {
         isChecked = newValue;
       }));
     }
+
     if (checkboxInput != null) {
       subscriptions.add(
           checkboxInput.hasFocus.listen((bool event) => isFocused = event));
-    }
-    if (disabledInput.isNotEmpty) {
+    } else {
       Timer.run(() => isDisabled = true);
     }
-    disabledInput.changes.listen((_) {
-      if (disabledInput.isNotEmpty) {
-        isDisabled = true;
-      }
-    });
+  }
+
+  void ngOnChanges(Map<String, SimpleChange> changes) {
+    print('checkbox Change: ${changes.keys}');
   }
 
   void ngOnDestroy() {
-    for (StreamSubscription subscription in subscriptions) {
+    for (StreamSubscription<dynamic> subscription in subscriptions) {
       subscription.cancel();
     }
     subscriptions.clear();

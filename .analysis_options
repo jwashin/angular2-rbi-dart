@@ -4,7 +4,7 @@ linter:
     - always_specify_types
     - avoid_as
     - camel_case_types
-#    - constant_identifier_names
+  #  - constant_identifier_names
     - empty_constructor_bodies
     - implementation_imports
     - library_names

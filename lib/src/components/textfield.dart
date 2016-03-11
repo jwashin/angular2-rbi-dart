@@ -19,22 +19,30 @@ import 'input_directives.dart';
 
 @Component(selector: '.mdl-textfield', template: '<ng-content></ng-content>')
 class Textfield implements AfterContentInit, OnDestroy {
-  @HostBinding('class.is-upgraded') bool isUpgraded = true;
-  @HostBinding('class.is-disabled') bool isDisabled = false;
-  @HostBinding('class.is-focused') bool isFocused = false;
-  @HostBinding('class.is-dirty') bool isDirty = false;
-  @HostBinding('class.is-invalid') bool isInvalid = false;
+  @HostBinding('class.is-upgraded')
+  bool isUpgraded = true;
+  @HostBinding('class.is-disabled')
+  bool isDisabled = false;
+  @HostBinding('class.is-focused')
+  bool isFocused = false;
+  @HostBinding('class.is-dirty')
+  bool isDirty = false;
+  @HostBinding('class.is-invalid')
+  bool isInvalid = false;
 
-  @ContentChild(FocusSource) FocusSource textInput;
-  @ContentChildren(DisabledInput) QueryList<DisabledInput> disabledInput;
-  @ContentChild(NgModel) NgModel ngModelInput;
+  @ContentChild(InputSource)
+  InputSource textInput;
+  @ContentChild(NgModel)
+  NgModel ngModelInput;
 
-  List<StreamSubscription> subscriptions = [];
+  List<StreamSubscription<dynamic>> subscriptions = [];
 
   void ngAfterContentInit() {
     if (textInput != null) {
       subscriptions
           .add(textInput.hasFocus.listen((bool event) => isFocused = event));
+    } else {
+      Timer.run(() => isDisabled = true);
     }
     if (ngModelInput != null) {
       subscriptions.add(ngModelInput.update.listen((_) {
@@ -42,18 +50,10 @@ class Textfield implements AfterContentInit, OnDestroy {
         isInvalid = !ngModelInput.valid;
       }));
     }
-    if (disabledInput.isNotEmpty) {
-      isDisabled = true;
-    }
-    subscriptions.add(disabledInput.changes.listen((_) {
-      if (disabledInput.isNotEmpty) {
-        isDisabled = true;
-      }
-    }));
   }
 
   void ngOnDestroy() {
-    for (StreamSubscription subscription in subscriptions) {
+    for (StreamSubscription<dynamic> subscription in subscriptions) {
       subscription.cancel();
     }
     subscriptions.clear();

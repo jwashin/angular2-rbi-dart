@@ -1,20 +1,21 @@
 import 'package:angular2/angular2.dart';
 
-@Directive(selector: 'input[disabled], textarea[disabled]')
-class DisabledInput {
-  @HostBinding('class.is-disabled') bool isDisabled = true;
-}
-
-/// Input focus manager. We just need to know the focused state of
-/// the input element for the MDL visuals.
-@Directive(
-    selector: "input:not([disabled]), textarea:not([disabled])")
-class FocusSource {
-  @Output() EventEmitter<bool> hasFocus = new EventEmitter();
+/// Input element. We need to know the focused state of the element for the
+/// MDL visuals. This is also where we get the name for Radio controls.
+@Directive(selector: "input:not([disabled]), textarea:not([disabled])")
+class InputSource {
+  @Output()
+  EventEmitter<bool> hasFocus = new EventEmitter<bool>();
+  @Input()
+  String name;
 
   @HostListener('focus')
-  void onFocus() => hasFocus.add(true);
+  void onFocus() {
+    hasFocus.add(true);
+  }
 
   @HostListener('blur')
-  void onBlur() => hasFocus.add(false);
+  void onBlur() {
+    hasFocus.add(false);
+  }
 }

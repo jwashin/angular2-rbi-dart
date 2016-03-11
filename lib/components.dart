@@ -22,14 +22,10 @@ export 'src/components/menu.dart';
 
 const List<Type> rbiComponents = const [
   Button,
-  DisabledInput,
-  FocusSource,
+  InputSource,
   Checkbox,
   Ripple,
-  Slider,
-  SliderBackgroundUpper,
-  SliderBackgroundLower,
-  SliderElement,
+  slider,
   Switch,
   IconToggle,
   Radio,

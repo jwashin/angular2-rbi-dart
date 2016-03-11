@@ -19,7 +19,7 @@ import 'package:angular2/angular2.dart';
         '></span>',
     styles: const [
       '.mdl-ripple {transform: translate(-50%, -50%) scale(1);'
-          'transition: all 0.5s cubic-bezier(0, 0, 0.2, 1);}',
+          'transition: all 0.4s cubic-bezier(0, 0, 0.2, 1);}',
       '.mdl-ripple.ng-enter {opacity: 0;'
           'transform: translate(-50%, -50%) scale(0.0001);}',
       '.mdl-ripple.ng-enter-active {opacity: .4;'
@@ -34,11 +34,10 @@ class Ripple {
   String rippleX, rippleY, rippleSize;
 
   @HostListener('mousedown', const ['\$event.client', '\$event.target'])
-
   /// Calculate center of the ripple effect and activate it.
-  void onMouseDown(Point clickPoint, Element rippleTarget,
+  void onMouseDown(Point<num> clickPoint, Element rippleTarget,
       [bool centerOnTarget]) {
-    Rectangle containerRect = rippleTarget.getBoundingClientRect();
+    Rectangle<num> containerRect = rippleTarget.getBoundingClientRect();
     rippleSize = '${
         (sqrt(containerRect.width * containerRect.width
             + containerRect.height * containerRect.height) * 2 + 2).round()}px';
@@ -59,6 +58,6 @@ class Ripple {
   }
 
   @HostListener('touchstart', const ['\$event.touches[0]', '\$event.target'])
-  void onTouchStart(Point client, Element target) =>
+  void onTouchStart(Point<num> client, Element target) =>
       onMouseDown(client, target);
 }

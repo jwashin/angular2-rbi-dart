@@ -21,16 +21,21 @@ import 'ripple.dart';
 ''',
     directives: const [Ripple])
 class Switch implements AfterContentInit, OnDestroy {
-  @HostBinding('class.is-checked') bool isChecked = false;
-  @HostBinding('class.is-upgraded') bool isUpgraded = true;
-  @HostBinding('class.is-disabled') bool isDisabled = false;
-  @HostBinding('class.is-focused') bool isFocused = false;
+  @HostBinding('class.is-checked')
+  bool isChecked = false;
+  @HostBinding('class.is-upgraded')
+  bool isUpgraded = true;
+  @HostBinding('class.is-disabled')
+  bool isDisabled = false;
+  @HostBinding('class.is-focused')
+  bool isFocused = false;
 
-  @ContentChild(FocusSource) FocusSource checkboxInput;
-  @ContentChild(NgModel) NgModel ngModelInput;
-  @ContentChildren(DisabledInput) QueryList<DisabledInput> disabledInput;
+  @ContentChild(InputSource)
+  InputSource checkboxInput;
+  @ContentChild(NgModel)
+  NgModel ngModelInput;
 
-  List<StreamSubscription> subscriptions = [];
+  List<StreamSubscription<bool>> subscriptions = [];
 
   @HostListener('mouseup')
   void onMouseUp() {
@@ -45,24 +50,18 @@ class Switch implements AfterContentInit, OnDestroy {
     if (checkboxInput != null) {
       subscriptions.add(
           checkboxInput.hasFocus.listen((bool event) => isFocused = event));
+    } else {
+      Timer.run(() => isDisabled = true);
     }
     if (ngModelInput != null) {
       Timer.run(() => isChecked = ngModelInput.value);
       subscriptions.add(
           ngModelInput.update.listen((bool newValue) => isChecked = newValue));
     }
-    if (disabledInput.isNotEmpty) {
-      Timer.run(() => isDisabled = true);
-    }
-    disabledInput.changes.listen((_) {
-      if (disabledInput.isNotEmpty) {
-        isDisabled = true;
-      }
-    });
   }
 
   void ngOnDestroy() {
-    for (StreamSubscription subscription in subscriptions) {
+    for (StreamSubscription<bool> subscription in subscriptions) {
       subscription.cancel();
     }
     subscriptions.clear();

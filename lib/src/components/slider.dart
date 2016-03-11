@@ -26,13 +26,22 @@ num asNumber(dynamic aValue) {
 }
 
 @Directive(selector: '.mdl-slider')
-class SliderElement {
-  @Input() dynamic min = 0;
-  @Input() dynamic max = 100;
-  @Input() dynamic value = 0;
+class SliderElement implements OnChanges {
+  @Input()
+  dynamic min = 0;
+  @Input()
+  dynamic max = 100;
+  @Input()
+  dynamic value = 0;
+  @Input()
+  bool disabled = false;
 
-  @HostBinding('class.is-upgraded') bool isUpgraded = true;
-  @HostBinding('class.is-lowest-value') bool valueIsLowestValue = false;
+  @HostBinding('class.is-upgraded')
+  bool isUpgraded = true;
+  @HostBinding('class.is-lowest-value')
+  bool valueIsLowestValue = false;
+  @HostBinding('class.is-disabled')
+  bool isDisabled = false;
 
   @HostListener('change', const ['\$event.target.value'])
   void onChange(dynamic value) => updateValueAndStyles(value);
@@ -49,21 +58,31 @@ class SliderElement {
     num calcMin = asNumber(min);
     valueIsLowestValue = calcValue == calcMin;
   }
+
+  void ngOnChanges(Map<String, SimpleChange> changes) {
+    if (changes.containsKey('disabled')) {
+      isDisabled = changes['disabled'].currentValue;
+    }
+  }
 }
 
 @Component(
     selector: '.mdl-slider__container', template: '<ng-content></ng-content>')
 class Slider implements AfterContentInit, OnDestroy {
-  @ContentChild(SliderElement) SliderElement sliderElement;
-  @ContentChild(SliderBackgroundLower) SliderBackgroundLower backgroundLower;
-  @ContentChild(SliderBackgroundUpper) SliderBackgroundUpper backgroundUpper;
-  @ContentChild(NgModel) NgModel ngModelInput;
+  @ContentChild(SliderElement)
+  SliderElement sliderElement;
+  @ContentChild(SliderBackgroundLower)
+  SliderBackgroundLower backgroundLower;
+  @ContentChild(SliderBackgroundUpper)
+  SliderBackgroundUpper backgroundUpper;
+  @ContentChild(NgModel)
+  NgModel ngModelInput;
 
   num max = 0;
   num min = 100;
   num value = 0;
 
-  List<StreamSubscription> subscriptions = [];
+  List<StreamSubscription<dynamic>> subscriptions = [];
 
   void ngAfterContentInit() {
     if (sliderElement != null) {
@@ -91,7 +110,7 @@ class Slider implements AfterContentInit, OnDestroy {
   }
 
   void ngOnDestroy() {
-    for (StreamSubscription subscription in subscriptions) {
+    for (StreamSubscription<dynamic> subscription in subscriptions) {
       subscription.cancel();
     }
     subscriptions.clear();
@@ -100,10 +119,19 @@ class Slider implements AfterContentInit, OnDestroy {
 
 @Directive(selector: '.mdl-slider__background-lower')
 class SliderBackgroundLower {
-  @HostBinding('style.flex') String flex = '0.0';
+  @HostBinding('style.flex')
+  String flex = '0.0';
 }
 
 @Directive(selector: '.mdl-slider__background-upper')
 class SliderBackgroundUpper {
-  @HostBinding('style.flex') String flex = '1.0';
+  @HostBinding('style.flex')
+  String flex = '1.0';
 }
+
+const List<Type> slider = const [
+  SliderElement,
+  Slider,
+  SliderBackgroundUpper,
+  SliderBackgroundLower
+];
