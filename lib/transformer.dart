@@ -18,7 +18,7 @@ class UpdateHtml extends Transformer {
 
   String get allowedExtensions => '.html';
 
-  Future apply(Transform transform) async {
+  Future<dynamic> apply(Transform transform) async {
     String content = await transform.primaryInput.readAsString();
     // lowercaseAttrName: false so [(ngModel)] doesn't become [(ngmodel)]
     HtmlParser parser = new HtmlParser(content, lowercaseAttrName: false);
@@ -43,10 +43,8 @@ class UpdateHtml extends Transformer {
   Element cloneWithNewTag(Element element, String newTag) {
     Element newElement = new Element.tag(newTag);
     newElement.classes.addAll(element.classes);
-    for (Node node in element.nodes) {
-      Node newNode = node.clone(true);
-      newElement.nodes.add(newNode);
-    }
+    newElement.attributes.addAll(element.attributes);
+    element.reparentChildren(newElement);
     return newElement;
   }
 
@@ -92,18 +90,17 @@ class UpdateHtml extends Transformer {
             .addAll({'[projection]': projection, '[buttonId]': "\'$elFor\'"});
         bool rippling = element.classes.contains('mdl-js-ripple-effect');
         for (Element li in element.querySelectorAll('.mdl-menu__item')) {
-          li.classes.add('rbi-menu-item');
-          li.classes.remove('mdl-menu__item');
+          Element newElement  = cloneWithNewTag(li, 'div');
+//          li.classes.add('rbi-menu-item');
+//          li.classes.remove('mdl-menu__item');
           if (rippling) {
             Element s = new Element.tag('span');
             s.classes.add('mdl-menu__item-ripple-container');
-            li.append(s);
+            newElement.append(s);
           }
-          Element liContainer = new Element.tag('rbi-menu-item');
-          Element newElement = cloneWithNewTag(li, 'div');
-          liContainer.append(newElement);
+          li.parent.insertBefore(newElement, li);
           li.remove();
-          element.append(liContainer);
+//          element.append(liContainer);
         }
         element.parent.append(menuContainer);
         // clone and re-tag element ul has ugly 40px default left padding
