@@ -14,7 +14,6 @@ class MenuButtonClickedNotifier {
   new EventEmitter<Map<String, Element>>();
 
   void click(Map<String, Element> clickInfo) {
-    print('${clickInfo.keys} clicked');
     menuButtonClicked.add(clickInfo);
   }
 }
@@ -71,7 +70,8 @@ class MenuButton {
           'transition: all .3s cubic-bezier(.4,0,.2,1);'
           'opacity:1;transform:scale(1)}',
       '.mdl-menu__outline.ng-enter{transform: scale(0)}',
-      '.mdl-menu__outline.ng-enter-active{transform: scale(1);}'
+      '.mdl-menu__outline.ng-enter-active{transform: scale(1);}',
+      '.mdl-menu{clip:initial;}'
     ],
     directives: const [
       CORE_DIRECTIVES,
@@ -142,7 +142,7 @@ class Menu implements AfterContentInit, OnDestroy {
       left = 'auto';
       top = 'auto';
     }
-    setItemTransitions();
+    setItemProperties();
     toggleDisplay();
     Timer.run(() {
       clickAwayListener = document.onClick.listen((_) => clickedAway());
@@ -150,31 +150,24 @@ class Menu implements AfterContentInit, OnDestroy {
   }
 
   void clickedAway() {
-    print('got event: clicked away');
-//    print('show Event: $showEvent, click event: $clickEvent');
-    print('I\'m open: $open');
     clickAwayListener.cancel();
     hide();
   }
 
   void toggleDisplay() {
-    print('toggle away from $open');
     if (open) {
       hide();
     } else {
       open = true;
-      print('now open');
     }
   }
 
   void hide() {
-
     resetTransitions();
     open = false;
-    print('now closed');
   }
 
-  void setItemTransitions() {
+  void setItemProperties() {
     List<MenuItem> items = menuItems.toList(growable: false);
     num menuLength = items.length;
     if (projection.startsWith('top')) {
@@ -187,6 +180,7 @@ class Menu implements AfterContentInit, OnDestroy {
       itemDelay += itemIncrement;
       item.transitionDelay = '${itemDelay}s';
       item.active = true;
+      item.shouldRipple = ripple;
     }
   }
 
@@ -223,6 +217,8 @@ class Menu implements AfterContentInit, OnDestroy {
         '<div *ngIf="active" class="item-text ng-animate"'
         ' [style.transition-delay]="transitionDelay"> '
         '<ng-content></ng-content>'
+        '<div *ngIf="shouldRipple" class="mdl-menu__item-ripple-container">'
+        '</div>'
         '</div>',
     styles: const [
       '.item-text{opacity:1;  transition:all .3s cubic-bezier(.4,0,.2,1);}',
@@ -230,7 +226,8 @@ class Menu implements AfterContentInit, OnDestroy {
       '.item-text.ng-enter-active {opacity: 1;}'
     ],
     directives: const [
-      CORE_DIRECTIVES
+      CORE_DIRECTIVES,
+      Ripple
     ])
 class MenuItem {
   @Attribute('tabindex')
@@ -238,13 +235,14 @@ class MenuItem {
 
   @HostBinding('style.opacity')
   String opacity = '1';
-  @ContentChild(Ripple)
+  @ViewChild(Ripple)
   Ripple ripple;
   @Output()
   EventEmitter<bool> menuItemClicked = new EventEmitter<bool>();
 
   bool active = false;
   String transitionDelay = '';
+  bool shouldRipple = false;
 
   @HostListener('mousedown', const ['\$event.client', '\$event.target'])
   void onMouseDown(Point<num> client, Element target) {
