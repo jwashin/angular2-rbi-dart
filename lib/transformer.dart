@@ -86,22 +86,19 @@ class UpdateHtml extends Transformer {
         buttonContainer.append(prevButton);
         parent.append(buttonContainer);
         Element menuContainer = new Element.tag('rbi-menu-container');
-        menuContainer.attributes
-            .addAll({'[projection]': projection, '[buttonId]': "\'$elFor\'"});
         bool rippling = element.classes.contains('mdl-js-ripple-effect');
+        Map<String, String> attrs = {
+          '[projection]': projection,
+          '[buttonId]': "\'$elFor\'",
+          '[ripple]': '$rippling'
+        };
+        menuContainer.attributes.addAll(attrs);
         for (Element li in element.querySelectorAll('.mdl-menu__item')) {
-          Element newElement  = cloneWithNewTag(li, 'div');
-//          li.classes.add('rbi-menu-item');
-//          li.classes.remove('mdl-menu__item');
-          if (rippling) {
-            Element s = new Element.tag('span');
-            s.classes.add('mdl-menu__item-ripple-container');
-            newElement.append(s);
-          }
+          Element newElement = cloneWithNewTag(li, 'li');
           li.parent.insertBefore(newElement, li);
           li.remove();
-//          element.append(liContainer);
         }
+
         element.parent.append(menuContainer);
         // clone and re-tag element ul has ugly 40px default left padding
         Element newElement = new Element.tag('div');
