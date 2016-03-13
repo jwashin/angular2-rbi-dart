@@ -50,16 +50,13 @@ class MenuButton {
 @Component(
     selector: 'rbi-menu-container',
     template: ''
-        '<div *ngIf="open" class="mdl-menu__outline" '
+        '<div *ngIf="open" class="mdl-menu__outline ng-animate" '
         '[style.height]="height" '
         '[style.width]="width" '
         '[style.left]="left" '
         '[style.top]="top" '
         '[style.right]="right" '
         '[style.bottom]="bottom" '
-        '[style.opacity]="1" '
-        '[style.transform]="\'none\'" '
-        '[style.transition]="\'none\'"'
         '[style.z-index]="999" '
         '[class.mdl-menu--bottom-left]="projection==\'bottom-left\'" '
         '[class.mdl-menu--top-left]="projection==\'top-left\'" '
@@ -68,7 +65,19 @@ class MenuButton {
         '>'
         '<ng-content></ng-content>'
         '</div>',
-    directives: const [NgIf, Ripple])
+    styles: const [
+      '.mdl-menu__outline{transition-delay:0s;'
+          'will-change:initial;'
+          'transition: all .3s cubic-bezier(.4,0,.2,1);'
+          'opacity:1;transform:scale(1)}',
+      '.mdl-menu__outline.ng-enter{transform: scale(0)}',
+      '.mdl-menu__outline.ng-enter-active{transform: scale(1);}'
+    ],
+    directives: const [
+      CORE_DIRECTIVES,
+      Ripple,
+      MenuItem
+    ])
 class Menu implements AfterContentInit, OnDestroy {
   @Input()
   String projection = '';
@@ -81,6 +90,8 @@ class Menu implements AfterContentInit, OnDestroy {
   QueryList<MenuItem> menuItems;
 
   List<StreamSubscription<dynamic>> subscriptions = [];
+
+  StreamSubscription<dynamic> clickAwayListener;
 
   bool open = false;
   int menuItemCount = 0;
@@ -97,16 +108,21 @@ class Menu implements AfterContentInit, OnDestroy {
   void resetTransitions() {
     for (MenuItem item in menuItems) {
       item.transitionDelay = '';
+      item.active = false;
     }
   }
 
   void onButtonClick(Element button) {
+//    while (!(['button'].contains(button.localName))) {
+//      button = button.parent;
+//    }
+    if (clickAwayListener != null) {
+      clickAwayListener.cancel();
+    }
     Rectangle<num> rect = button.getBoundingClientRect();
     // parent.parent because we wrapped the button in a rbi-menu-button
     // container
     Rectangle<num> forRect = button.parent.parent.getBoundingClientRect();
-    print(projection);
-
     // since mdl-menu__outline sets left=top=0, we set left and top to 'auto'
     // if we are not otherwise setting them
     if (projection == 'bottom-left' || projection == '') {
@@ -126,24 +142,53 @@ class Menu implements AfterContentInit, OnDestroy {
       left = 'auto';
       top = 'auto';
     }
-    toggle(button);
+    setItemTransitions();
+    toggleDisplay();
+    Timer.run(() {
+      clickAwayListener = document.onClick.listen((_) => clickedAway());
+    });
   }
 
-  void toggle(Element button) {
+  void clickedAway() {
+    print('got event: clicked away');
+//    print('show Event: $showEvent, click event: $clickEvent');
+    print('I\'m open: $open');
+    clickAwayListener.cancel();
+    hide();
+  }
+
+  void toggleDisplay() {
+    print('toggle away from $open');
     if (open) {
       hide();
     } else {
       open = true;
+      print('now open');
     }
   }
 
   void hide() {
+
     resetTransitions();
     open = false;
-//    menu.isAnimating = false;
+    print('now closed');
   }
 
-  void setTransitions() {}
+  void setItemTransitions() {
+    List<MenuItem> items = menuItems.toList(growable: false);
+    num menuLength = items.length;
+    if (projection.startsWith('top')) {
+      items = items.reversed.toList(growable: false);
+    }
+    num itemIncrement =
+        transitionDurationSeconds * transitionDurationFraction / menuLength;
+    num itemDelay = -itemIncrement;
+    for (MenuItem item in items) {
+      itemDelay += itemIncrement;
+      item.transitionDelay = '${itemDelay}s';
+      item.active = true;
+    }
+  }
 
   void ngAfterContentInit() {
     subscriptions.add(menuButtonClickedNotifier.menuButtonClicked
@@ -152,6 +197,16 @@ class Menu implements AfterContentInit, OnDestroy {
         onButtonClick(data[buttonId]);
       }
     }));
+    for (MenuItem menuItem in menuItems) {
+      subscriptions.add(menuItem.menuItemClicked.listen((bool isClicked) {
+        if (clickAwayListener != null) {
+          clickAwayListener.cancel();
+        }
+        new Timer(new Duration(milliseconds: closeTimeout), () {
+          hide();
+        });
+      }));
+    }
   }
 
   void ngOnDestroy() {
@@ -165,18 +220,31 @@ class Menu implements AfterContentInit, OnDestroy {
 @Component(
     selector: '.mdl-menu__item',
     template: ''
-        '<ng-content></ng-content>')
+        '<div *ngIf="active" class="item-text ng-animate"'
+        ' [style.transition-delay]="transitionDelay"> '
+        '<ng-content></ng-content>'
+        '</div>',
+    styles: const [
+      '.item-text{opacity:1;  transition:all .3s cubic-bezier(.4,0,.2,1);}',
+      '.item-text.ng-enter {opacity: 0;}',
+      '.item-text.ng-enter-active {opacity: 1;}'
+    ],
+    directives: const [
+      CORE_DIRECTIVES
+    ])
 class MenuItem {
   @Attribute('tabindex')
   String tabIndex = '-1';
-  @HostBinding('style.transition-delay')
-  String transitionDelay = '';
+
   @HostBinding('style.opacity')
   String opacity = '1';
   @ContentChild(Ripple)
   Ripple ripple;
   @Output()
   EventEmitter<bool> menuItemClicked = new EventEmitter<bool>();
+
+  bool active = false;
+  String transitionDelay = '';
 
   @HostListener('mousedown', const ['\$event.client', '\$event.target'])
   void onMouseDown(Point<num> client, Element target) {
