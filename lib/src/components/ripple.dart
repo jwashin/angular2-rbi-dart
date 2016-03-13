@@ -2,6 +2,7 @@ library component_ripple;
 
 import 'dart:html';
 import 'dart:math' show sqrt;
+import 'dart:async';
 import 'package:angular2/angular2.dart';
 
 @Component(
@@ -21,19 +22,21 @@ import 'package:angular2/angular2.dart';
       '.mdl-ripple {transform: translate(-50%, -50%) scale(1);'
           'transition: all 0.4s cubic-bezier(0, 0, 0.2, 1);}',
       '.mdl-ripple.ng-enter {opacity: 0;'
-          'transform: translate(-50%, -50%) scale(0.0001);}',
+          'transform: translate(-50%, -50%) scale(0);}',
       '.mdl-ripple.ng-enter-active {opacity: .4;'
           'transform: translate(-50%, -50%) scale(1);}'
     ],
     directives: const [
-      NgIf
+      CORE_DIRECTIVES
     ])
 class Ripple {
-  @Input() bool centered = false;
+  @Input()
+  bool centered = false;
   bool active = false;
   String rippleX, rippleY, rippleSize;
 
   @HostListener('mousedown', const ['\$event.client', '\$event.target'])
+
   /// Calculate center of the ripple effect and activate it.
   void onMouseDown(Point<num> clickPoint, Element rippleTarget,
       [bool centerOnTarget]) {
@@ -50,6 +53,7 @@ class Ripple {
       rippleX = '${clickPoint.x - containerRect.left}px';
     }
     active = true;
+    new Timer(new Duration(milliseconds: 500), (() => active = false));
   }
 
   @HostListener('mouseup')
