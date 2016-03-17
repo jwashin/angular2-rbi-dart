@@ -124,7 +124,6 @@ class Menu implements AfterContentInit, OnDestroy {
   List<StreamSubscription<dynamic>> subscriptions = [];
 
   bool open = false;
-  int menuItemCount = 0;
   bool buttonFocused = false;
   bool menuFocused = false;
 
@@ -217,7 +216,7 @@ class Menu implements AfterContentInit, OnDestroy {
         if (items.length > currentIndex + 1) {
           items[currentIndex + 1].focus();
         } else {
-          items[0].focus();
+          items.first.focus();
         }
       } else if (keyCode == space || keyCode == enter) {
         event.preventDefault();
@@ -231,10 +230,10 @@ class Menu implements AfterContentInit, OnDestroy {
   }
 
   void setItemProperties() {
-    List<MenuItem> items = menuItems.toList(growable: false);
+    dynamic items = menuItems.toList(growable: false);
     num menuLength = items.length;
     if (projection.startsWith('top')) {
-      items = items.reversed.toList(growable: false);
+      items = items.reversed;
     }
     num itemIncrement =
         transitionDurationSeconds * transitionDurationFraction / menuLength;
