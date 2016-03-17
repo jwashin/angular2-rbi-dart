@@ -45,10 +45,12 @@ class MenuButton implements AfterContentInit, OnDestroy {
   @ContentChild(Button)
   Button button;
 
-  @HostListener('click')
-  void onClick() {
+  @HostListener('click', const ['\$event.target'])
+  void onClick(dynamic target) {
     button.focus();
-    dynamic target = button.ref.nativeElement;
+    while (!(target.localName == 'button')) {
+      target = target.parent;
+    }
     menuButtonNotifier.info(new ButtonMessage(buttonId, 'click', target));
   }
 
