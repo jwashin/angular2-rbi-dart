@@ -13,4 +13,6 @@ dependencies:
 
 transformers:
 - angular2:
-    entry_points: [lib/directives.dart]
+    platform_directives:
+    - 'package:angular2/common.dart#COMMON_DIRECTIVES'
+    entry_points: [lib/components.dart]

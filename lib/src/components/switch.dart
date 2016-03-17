@@ -9,17 +9,16 @@ import 'ripple.dart';
 
 @Component(
     selector: '.mdl-switch',
-    template: '''
-<ng-content></ng-content>
-<span class="mdl-switch__label"></span>
-<div class="mdl-switch__track"></div>
-<div class="mdl-switch__thumb">
-  <span class="mdl-switch__focus-helper"></span>
-</div>
-<span class="mdl-switch__ripple-container" [centered]="true">
-</span>
-''',
-    directives: const [Ripple])
+    template: '<ng-content></ng-content>'
+        '<span class="mdl-switch__label"></span>'
+        '<div class="mdl-switch__track"></div>'
+        '<div class="mdl-switch__thumb">'
+        '  <span class="mdl-switch__focus-helper"></span>'
+        '</div>'
+        '<span *ngIf="shouldRipple" class="mdl-switch__ripple-container" '
+        '[centered]="true">'
+        '</span>',
+    directives: const [NgIf, Ripple])
 class Switch implements AfterContentInit, OnDestroy {
   @HostBinding('class.is-checked')
   bool isChecked = false;
@@ -29,6 +28,9 @@ class Switch implements AfterContentInit, OnDestroy {
   bool isDisabled = false;
   @HostBinding('class.is-focused')
   bool isFocused = false;
+
+  @Input()
+  bool shouldRipple = false;
 
   @ContentChild(InputSource)
   InputSource checkboxInput;

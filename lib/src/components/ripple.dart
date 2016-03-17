@@ -7,7 +7,7 @@ import 'package:angular2/angular2.dart';
 
 @Component(
     selector: '.mdl-button__ripple-container, '
-        '.mdl-menu__item-ripple-container, '
+        '.mdl-menu__item--ripple-container, '
         '.mdl-switch__ripple-container, '
         '.mdl-checkbox__ripple-container, '
         '.mdl-radio__ripple-container, '
@@ -53,6 +53,7 @@ class Ripple {
       rippleX = '${clickPoint.x - containerRect.left}px';
     }
     active = true;
+//    print('rippling');
     new Timer(new Duration(milliseconds: 500), (() => active = false));
   }
 

@@ -7,14 +7,11 @@ import 'ripple.dart';
 
 @Component(
     selector: '.mdl-icon-toggle',
-    template: '''
-<ng-content></ng-content>
-<span class="mdl-icon-toggle__ripple-container" [centered]="true"></span>
-''',
+    template: '<ng-content></ng-content>'
+        '<span *ngIf="shouldRipple" class="mdl-icon-toggle__ripple-container" '
+        '[centered]="true"></span>',
     directives: const [NgIf, Ripple])
 class IconToggle implements AfterContentInit, OnDestroy {
-  @Input('class')
-  String hostClasses;
   @HostBinding('class.is-checked')
   bool isChecked = false;
   @HostBinding('class.is-upgraded')
@@ -23,10 +20,14 @@ class IconToggle implements AfterContentInit, OnDestroy {
   bool isDisabled = false;
   @HostBinding('class.is-focused')
   bool isFocused = false;
+
   @ContentChild(NgModel)
   NgModel ngModelInput;
   @ContentChild(InputSource)
   InputSource checkboxInput;
+
+  @Input()
+  bool shouldRipple = false;
 
   List<StreamSubscription<bool>> subscriptions = [];
 

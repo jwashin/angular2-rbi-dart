@@ -15,17 +15,13 @@ RadioNotifier radioNotifier = new RadioNotifier();
 
 @Component(
     selector: '.mdl-radio',
-    template: '''
-    <ng-content></ng-content>
-    <span class="mdl-radio__outer-circle"></span>
-    <span class="mdl-radio__inner-circle"></span>
-    <span class="mdl-radio__ripple-container" [centered]="true"></span>
-    ''',
-    directives: const [Ripple])
+    template: '<ng-content></ng-content>'
+        '<span class="mdl-radio__outer-circle"></span>'
+        '<span class="mdl-radio__inner-circle"></span>'
+        '<span *ngIf="shouldRipple" class="mdl-radio__ripple-container" '
+        '[centered]="true"></span>',
+    directives: const [NgIf, Ripple])
 class Radio implements OnInit, AfterContentInit, OnDestroy {
-//  @Input()
-//  String name = '';
-
   @HostBinding('class.is-checked')
   bool isChecked = false;
   @HostBinding('class.is-upgraded')
@@ -34,6 +30,9 @@ class Radio implements OnInit, AfterContentInit, OnDestroy {
   bool isDisabled = false;
   @HostBinding('class.is-focused')
   bool isFocused = false;
+
+  @Input()
+  bool shouldRipple = false;
 
   @ContentChild(InputSource)
   InputSource radioInput;
@@ -55,7 +54,6 @@ class Radio implements OnInit, AfterContentInit, OnDestroy {
 
   void ngOnInit() {
     subscriptions.add(checkedNotifier.newlyChecked.listen((Radio radio) {
-//      print('my name is $name, and the other radio\'s name is ${radio.name}');
       if (radio.name == name && radio != this) {
         isChecked = false;
       }
@@ -64,7 +62,6 @@ class Radio implements OnInit, AfterContentInit, OnDestroy {
 
   void ngAfterContentInit() {
     //set listeners on the radio properties
-
     if (radioInput != null) {
       subscriptions
           .add(radioInput.hasFocus.listen((bool event) => isFocused = event));

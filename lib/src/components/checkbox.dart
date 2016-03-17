@@ -9,16 +9,15 @@ import 'input_directives.dart';
 
 @Component(
     selector: '.mdl-checkbox',
-    template: '''
-<ng-content></ng-content>
-<span class="mdl-checkbox__focus-helper"></span>
-<span class="mdl-checkbox__box-outline">
-  <span class="mdl-checkbox__tick-outline"></span>
-</span>
-<span class="mdl-checkbox__ripple-container" [centered]="true"></span>
-''',
-    directives: const [Ripple])
-class Checkbox implements AfterContentInit, OnDestroy, OnChanges {
+    template: '<ng-content></ng-content>'
+        '<span class="mdl-checkbox__focus-helper"></span>'
+        '<span class="mdl-checkbox__box-outline">'
+        '  <span class="mdl-checkbox__tick-outline"></span>'
+        '</span>'
+        '<span *ngIf="shouldRipple" class="mdl-checkbox__ripple-container" '
+        '[centered]="true"></span>',
+    directives: const [NgIf, Ripple])
+class Checkbox implements AfterContentInit, OnDestroy {
   @HostBinding('class.is-checked')
   bool isChecked = false;
   @HostBinding('class.is-upgraded')
@@ -31,6 +30,9 @@ class Checkbox implements AfterContentInit, OnDestroy, OnChanges {
   NgModel ngModelInput;
   @ContentChild(InputSource)
   InputSource checkboxInput;
+
+  @Input()
+  bool shouldRipple = false;
 
   List<StreamSubscription<dynamic>> subscriptions = [];
 
@@ -64,10 +66,6 @@ class Checkbox implements AfterContentInit, OnDestroy, OnChanges {
     } else {
       Timer.run(() => isDisabled = true);
     }
-  }
-
-  void ngOnChanges(Map<String, SimpleChange> changes) {
-    print('checkbox Change: ${changes.keys}');
   }
 
   void ngOnDestroy() {

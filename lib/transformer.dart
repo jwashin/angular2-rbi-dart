@@ -91,7 +91,7 @@ class UpdateHtml extends Transformer {
             element.classes.contains('[shouldRipple]');
         for (Element li in element.querySelectorAll('.mdl-menu__item')) {
           Element newElement = cloneWithNewTag(li, 'button');
-          String style = 'opacity:1;width:100%;';
+          String style = 'opacity:1;width:100%';
           newElement.attributes.addAll({
             'style': style,
             '[shouldRipple]': '$rippling',
