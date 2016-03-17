@@ -25,18 +25,18 @@ class UpdateHtml extends Transformer {
     document = parser.parse();
     fixMenus();
     fixSliders();
-    fixButtons();
+    setRipples();
     AssetId id = transform.primaryInput.id;
     transform.addOutput(new Asset.fromString(id, document.outerHtml));
   }
 
-  /// Convert mdl-js-ripple-effect class into ripple attribute.
-  void fixButtons() {
-    List<Element> buttons = document.querySelectorAll('button.mdl-button');
-    for (Element button in buttons) {
-      if (button.classes.contains('mdl-js-ripple-effect')) {
-        button.attributes.addAll({'[ripple]': 'true'});
-      }
+  //so that we do not have to look up a class at runtime
+  void setRipples() {
+    List<Element> mdlRipples =
+    document.querySelectorAll('.mdl-js-ripple-effect');
+    for (Element element in mdlRipples) {
+      element.attributes.addAll({'[shouldRipple]': 'true'});
+      element.classes.remove('mdl-js-ripple-effect');
     }
   }
 
@@ -50,14 +50,13 @@ class UpdateHtml extends Transformer {
 
   /// Repackage menu: do the class queries and containerize.
   void fixMenus() {
-    List<Element> menus = document.querySelectorAll('ul.mdl-js-menu');
+    List<Element> menus = document.querySelectorAll('.mdl-js-menu');
     String projection;
     String className;
     for (Element element in menus) {
       for (className in element.classes) {
         if (className.startsWith('mdl-menu--')) {
           projection = "'${className.split('--')[1]}'";
-
           break;
         }
       }
@@ -74,6 +73,8 @@ class UpdateHtml extends Transformer {
         }
       }
       if (elFor == null || elFor.isEmpty) {
+        print("found .mdl-js-menu without 'for', 'data-mdl-for' or"
+            " 'data-for' attribute");
         continue;
       }
       Element prevButton = document.querySelector('#$elFor');
@@ -86,30 +87,29 @@ class UpdateHtml extends Transformer {
         buttonContainer.append(prevButton);
         parent.append(buttonContainer);
         Element menuContainer = new Element.tag('rbi-menu-container');
-        bool rippling = element.classes.contains('mdl-js-ripple-effect');
-        Map<String, String> attrs = {
-          '[projection]': projection,
-          '[buttonId]': "\'$elFor\'",
-          '[ripple]': '$rippling'
-        };
-        menuContainer.attributes.addAll(attrs);
+        bool rippling = element.classes.contains('mdl-js-ripple-effect') ||
+            element.classes.contains('[shouldRipple]');
         for (Element li in element.querySelectorAll('.mdl-menu__item')) {
-          Element newElement = cloneWithNewTag(li, 'li');
-          li.parent.insertBefore(newElement, li);
+          Element newElement = cloneWithNewTag(li, 'button');
+          String style = 'opacity:1;width:100%;';
+          newElement.attributes.addAll({
+            'style': style,
+            '[shouldRipple]': '$rippling',
+            'tabindex': '-1',
+//            '(click)': 'toConsole(\'$elFor menu clicked!\')'
+          });
+          menuContainer.append(newElement);
           li.remove();
         }
 
-        element.parent.append(menuContainer);
-        // clone and re-tag element ul has ugly 40px default left padding
-        Element newElement = new Element.tag('div');
-        newElement.classes.addAll(element.classes);
-        for (Node node in element.nodes) {
-          Node newNode = node.clone(true);
-          newElement.nodes.add(newNode);
-        }
-//        element.parent.append(newElement);
+        Map<String, String> attributes = {
+          '[projection]': projection,
+          '[buttonId]': "\'$elFor\'",
+          '[shouldRipple]': '$rippling'
+        };
+        menuContainer.attributes.addAll(attributes);
+        parent.append(menuContainer);
         element.remove();
-        menuContainer.append(newElement);
       }
     }
   }
