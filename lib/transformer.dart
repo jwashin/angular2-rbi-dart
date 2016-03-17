@@ -96,7 +96,6 @@ class UpdateHtml extends Transformer {
             'style': style,
             '[shouldRipple]': '$rippling',
             'tabindex': '-1',
-//            '(click)': 'toConsole(\'$elFor menu clicked!\')'
           });
           menuContainer.append(newElement);
           li.remove();
