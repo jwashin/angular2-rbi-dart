@@ -1,20 +1,22 @@
-import 'dart:html';
 import 'dart:async';
 
 import 'package:angular2/angular2.dart';
 
 /// Slider Directive
-///     usage: make an `<input type="range">` tag with class 'mdl-slider'
-///     and tag attributes max, min, value, and step.
+///     usage: make an `<input type="range">` tag with classes
+///     'mdl-slider' (to get MDL styles)
+///     and 'mdl-js-slider' (to get this behavior)
+///
+///     the <input type="range"> tag uses attributes max, min, value, and step.
 ///
 ///     min, max, value, and step may be dynamic inputs and can be numbers or
 ///     strings that parse to numbers.
 ///
-///     use FORM_DIRECTIVES and Slider as directives in enclosing components.
+///     use `FORM_DIRECTIVES` and `slider` as directives in enclosing components.
 ///
 ///     use e.g., `[(ngModel)]="someVariable"` to use/operate on the value.
 ///
-///       `<input class="mdl-slider" type="range" min="0"
+///       `<input class="mdl-slider mdl-js-slider" type="range" min="0"
 ///       max="100" [(ngModel)]="sliderValue1" tabindex="0">
 ///       <p>{{sliderValue1}}</p>`
 ///
@@ -25,7 +27,7 @@ num asNumber(dynamic aValue) {
   return aValue is String ? num.parse(aValue) : aValue;
 }
 
-@Directive(selector: '.mdl-slider')
+@Directive(selector: '.mdl-js-slider')
 class SliderElement implements OnChanges {
   @Input()
   dynamic min = 0;
@@ -50,7 +52,7 @@ class SliderElement implements OnChanges {
   void onInput(dynamic value) => updateValueAndStyles(value);
 
   @HostListener('mouseup', const ['\$event.target'])
-  void onMouseUp(InputElement target) => target.blur();
+  void onMouseUp(dynamic target) => target.blur();
 
   void updateValueAndStyles(dynamic inputValue) {
     value = inputValue;
@@ -91,7 +93,8 @@ class Slider implements AfterContentInit, OnDestroy {
     }
 
     if (ngModelInput != null) {
-      // Timer is a hack for displaying an initial value properly
+      // display the initial value without getting
+      // *changed after checked* notice
       Timer.run(() {
         value = asNumber(ngModelInput.value);
         setSliderValues();
