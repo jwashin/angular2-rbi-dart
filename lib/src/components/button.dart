@@ -1,34 +1,54 @@
 library material_component_button;
 
-import 'dart:html';
-
 import 'package:angular2/angular2.dart';
 
 import 'ripple.dart';
 
 @Component(
-    selector: 'button.mdl-button',
+    selector: 'button.mdl-js-button',
     template: '<ng-content></ng-content>'
-        '<span *ngIf="ripple" class="mdl-button__ripple-container"></span>',
+        '<span *ngIf="shouldRipple" class="mdl-button__ripple-container">'
+        '</span>',
     directives: const [NgIf, Ripple])
 class Button {
-  @Input() bool ripple = false;
+  ElementRef ref;
+  Renderer renderer;
 
-  @HostListener('mouseup', const ['\$event.target'])
-  void onMouseUp(Element target) {
-    // the below used to be enclosed in if (event.detail != 2)
-    // dunno if click count is needed here
+  // added instance variable to help menus
+  bool keepFocus = false;
 
-    // find our <button> element to blur
-    while (!(target.localName == 'button')) {
-      target = target.parent;
+  Button(this.renderer, this.ref);
+
+  @Input()
+  bool shouldRipple = false;
+
+  @Output()
+  EventEmitter<bool> hasFocus = new EventEmitter<bool>();
+
+  void focus() => renderer.invokeElementMethod(ref.nativeElement, 'focus', []);
+
+  void blur() => renderer.invokeElementMethod(ref.nativeElement, 'blur', []);
+
+  @HostListener('mouseup')
+  void onMouseUp() {
+    if (!keepFocus) {
+      blur();
     }
-    target.blur();
   }
 
-  @HostListener('mouseleave', const ['\$event.target'])
-  void onMouseLeave(Element element) => onMouseUp(element);
+  @HostListener('mouseleave')
+  void onMouseLeave() => onMouseUp();
 
-  @HostListener('touchend', const ['\$event.target'])
-  void onTouchEnd(Element element) => onMouseUp(element);
+  @HostListener('touchend')
+  void onTouchEnd() => onMouseUp();
+
+  @HostListener('focus')
+  void onFocus() {
+    hasFocus.add(true);
+  }
+
+  @HostListener('blur')
+  void onBlur() {
+    hasFocus.add(false);
+  }
 }
