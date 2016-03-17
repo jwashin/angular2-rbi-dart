@@ -186,7 +186,9 @@ class Menu implements AfterContentInit, OnDestroy {
   }
 
   void handleForKeyboardEvent(int keyCode) {
-    List<MenuItem> items = menuItems.toList(growable: false);
+    List<MenuItem> items = menuItems
+        .where((MenuItem item) => !item.isDisabled)
+        .toList(growable: false);
     if (items.length > 0 && open) {
       if (keyCode == upArrow) {
         items.last.focus();
