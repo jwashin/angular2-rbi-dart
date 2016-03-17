@@ -9,6 +9,12 @@ const num transitionDurationSeconds = 0.3;
 const num transitionDurationFraction = 0.8;
 const num closeTimeout = 150;
 
+const int enter = 13;
+const int escape = 27;
+const int space = 32;
+const int upArrow = 38;
+const int downArrow = 40;
+
 class MenuButtonClickedNotifier {
   EventEmitter<Map<String, Element>> menuButtonClicked =
   new EventEmitter<Map<String, Element>>();
@@ -18,15 +24,22 @@ class MenuButtonClickedNotifier {
   }
 }
 
+class MenuButtonKeyNotifier {
+  EventEmitter<Map<String, int>> menuButtonKeyPressed =
+  new EventEmitter<Map<String, int>>();
+
+  void keyPress(Map<String, int> keyInfo) {
+    menuButtonKeyPressed.add(keyInfo);
+  }
+}
+
 MenuButtonClickedNotifier menuButtonClickedNotifier =
 new MenuButtonClickedNotifier();
 
+MenuButtonKeyNotifier menuButtonKeyNotifier = new MenuButtonKeyNotifier();
+
 @Component(selector: 'rbi-menu-button', template: '<ng-content></ng-content>')
 class MenuButton {
-  EventEmitter<Element> menuButtonClicked = new EventEmitter<Element>();
-
-//  EventEmitter menuButtonKey = new EventEmitter();
-
   @Input()
   String buttonId;
 
@@ -40,8 +53,18 @@ class MenuButton {
     menuButtonClickedNotifier.click({buttonId: target});
   }
 
-  @HostListener('keydown')
-  void onKeyDown() {}
+  @HostListener('focus', const ['\$event.target'])
+  void onFocus(Element target) => onClick(target);
+
+  @HostListener('keydown', const ['\$event'])
+  void onKeyDown(KeyboardEvent event) {
+    int keyCode = event.keyCode;
+    if ([upArrow, downArrow].contains(keyCode)) {
+      event.preventDefault();
+      print('key pressed $keyCode');
+      menuButtonKeyNotifier.keyPress({buttonId: keyCode});
+    }
+  }
 }
 
 // mdl-menu__outline rbi-menu-outline
@@ -56,7 +79,7 @@ class MenuButton {
         '[style.top]="top" '
         '[style.right]="right" '
         '[style.bottom]="bottom" '
-        '[style.z-index]="999" '
+        '[style.z-index]="\'999\'" '
         '[class.mdl-menu--bottom-left]="projection==\'bottom-left\'" '
         '[class.mdl-menu--top-left]="projection==\'top-left\'" '
         '[class.mdl-menu--bottom-right]="projection==\'bottom-right\'" '
@@ -66,27 +89,25 @@ class MenuButton {
         '</div>',
     styles: const [
       '.mdl-menu__outline{transition-delay:0s;'
-          'will-change:initial;'
+          'padding:8px 0;'
           'transition: all .3s cubic-bezier(.4,0,.2,1);'
           'opacity:1;transform:scale(1)}',
       '.mdl-menu__outline.ng-enter{transform: scale(0)}',
       '.mdl-menu__outline.ng-enter-active{transform: scale(1);}',
-      '.mdl-menu{clip:initial;}'
     ],
     directives: const [
-      CORE_DIRECTIVES,
-      Ripple,
-      MenuItem
+      NgIf,
+      Ripple
     ])
 class Menu implements AfterContentInit, OnDestroy {
   @Input()
   String projection = '';
   @Input()
-  bool ripple = false;
+  bool shouldRipple = false;
   @Input()
   String buttonId;
 
-  @ContentChildren(MenuItem)
+  @ContentChildren(MenuItem, descendants: true)
   QueryList<MenuItem> menuItems;
 
   List<StreamSubscription<dynamic>> subscriptions = [];
@@ -96,7 +117,7 @@ class Menu implements AfterContentInit, OnDestroy {
   bool open = false;
   int menuItemCount = 0;
 
-  void menuItemClicked() {}
+//  void menuItemClicked() {}
 
   String left,
       right,
@@ -113,9 +134,6 @@ class Menu implements AfterContentInit, OnDestroy {
   }
 
   void onButtonClick(Element button) {
-//    while (!(['button'].contains(button.localName))) {
-//      button = button.parent;
-//    }
     if (clickAwayListener != null) {
       clickAwayListener.cancel();
     }
@@ -144,6 +162,8 @@ class Menu implements AfterContentInit, OnDestroy {
     }
     setItemProperties();
     toggleDisplay();
+    // If we start the listener right now, then we have to check whether the
+    // click that got here came from the listener.
     Timer.run(() {
       clickAwayListener = document.onClick.listen((_) => clickedAway());
     });
@@ -167,9 +187,56 @@ class Menu implements AfterContentInit, OnDestroy {
     open = false;
   }
 
+  void handleForKeyboardEvent(int keyCode) {
+    List<MenuItem> items = menuItems.toList(growable: false);
+    if (items.length > 0 && open) {
+      if (keyCode == upArrow) {
+        items.last.focus();
+      } else if (keyCode == downArrow) {
+        items.first.focus();
+      }
+    }
+  }
+
+  void handleItemKeyboardEvent(MenuItem item, KeyboardEvent event) {
+    List<MenuItem> items = menuItems
+        .where((MenuItem item) => !item.isDisabled)
+        .toList(growable: false);
+    int keyCode = event.keyCode;
+    if (items.length > 0) {
+      int currentIndex = items.indexOf(item);
+      if (keyCode == upArrow) {
+        event.preventDefault();
+        if (currentIndex > 0) {
+          items[currentIndex - 1].focus();
+        } else {
+          items[items.length - 1].focus();
+        }
+      } else if (keyCode == downArrow) {
+        event.preventDefault();
+        if (items.length > currentIndex + 1) {
+          items[currentIndex + 1].focus();
+        } else {
+          items[0].focus();
+        }
+      } else if (keyCode == space || keyCode == enter) {
+        event.preventDefault();
+//        event.target.dispatchEvent(new MouseEvent('mousedown'));
+        item.keyRipple(event.target);
+//        event.target.dispatchEvent(new MouseEvent('mouseup'));
+//        event.target.dispatchEvent(new MouseEvent('click'));
+        item.click();
+      } else if (keyCode == escape) {
+        event.preventDefault();
+        hide();
+      }
+    }
+  }
+
   void setItemProperties() {
     List<MenuItem> items = menuItems.toList(growable: false);
     num menuLength = items.length;
+//    print('menu length: $menuLength');
     if (projection.startsWith('top')) {
       items = items.reversed.toList(growable: false);
     }
@@ -180,7 +247,7 @@ class Menu implements AfterContentInit, OnDestroy {
       itemDelay += itemIncrement;
       item.transitionDelay = '${itemDelay}s';
       item.active = true;
-      item.shouldRipple = ripple;
+      item.shouldRipple = shouldRipple;
     }
   }
 
@@ -191,6 +258,14 @@ class Menu implements AfterContentInit, OnDestroy {
         onButtonClick(data[buttonId]);
       }
     }));
+
+    subscriptions.add(menuButtonKeyNotifier.menuButtonKeyPressed
+        .listen((Map<String, int> data) {
+      if (data.containsKey(buttonId)) {
+        handleForKeyboardEvent(data[buttonId]);
+      }
+    }));
+
     for (MenuItem menuItem in menuItems) {
       subscriptions.add(menuItem.menuItemClicked.listen((bool isClicked) {
         if (clickAwayListener != null) {
@@ -199,6 +274,9 @@ class Menu implements AfterContentInit, OnDestroy {
         new Timer(new Duration(milliseconds: closeTimeout), () {
           hide();
         });
+      }));
+      subscriptions.add(menuItem.keyPressed.listen((Map<String, dynamic> data) {
+        handleItemKeyboardEvent(data['item'], data['event']);
       }));
     }
   }
@@ -215,51 +293,81 @@ class Menu implements AfterContentInit, OnDestroy {
     selector: '.mdl-menu__item',
     template: ''
         '<div *ngIf="active" class="item-text ng-animate"'
-        ' [style.transition-delay]="transitionDelay"> '
-        '<ng-content></ng-content>'
-        '<div *ngIf="shouldRipple" class="mdl-menu__item-ripple-container">'
-        '</div>'
+        ' [style.transition-delay]="transitionDelay"'
+        '> '
+        '  <ng-content></ng-content> '
+        '  <div *ngIf="shouldRipple" class="mdl-menu__item--ripple-container">'
+        '  </div>'
         '</div>',
     styles: const [
-      '.item-text{opacity:1;  transition:all .3s cubic-bezier(.4,0,.2,1);}',
+      '.item-text{overflow:hidden; opacity:1;  '
+          'transition:all .3s cubic-bezier(.4,0,.2,1);}',
       '.item-text.ng-enter {opacity: 0;}',
       '.item-text.ng-enter-active {opacity: 1;}'
     ],
     directives: const [
-      CORE_DIRECTIVES,
+      NgIf,
       Ripple
     ])
 class MenuItem {
-  @Attribute('tabindex')
-  String tabIndex = '-1';
+  ElementRef ref;
+  Renderer renderer;
 
-  @HostBinding('style.opacity')
-  String opacity = '1';
+  MenuItem(this.ref, this.renderer);
+
+  @Input()
+  dynamic disabled = false;
+
+  bool get isDisabled => disabled == '' ? true : disabled;
+
   @ViewChild(Ripple)
   Ripple ripple;
+
   @Output()
   EventEmitter<bool> menuItemClicked = new EventEmitter<bool>();
+
+  @Output()
+  EventEmitter<Map<String, dynamic>> keyPressed =
+  new EventEmitter<Map<String, dynamic>>();
 
   bool active = false;
   String transitionDelay = '';
   bool shouldRipple = false;
 
+  void focus() {
+    renderer.invokeElementMethod(ref.nativeElement, 'focus', []);
+  }
+
+  void click() {
+    renderer.invokeElementMethod(ref.nativeElement, 'click', []);
+  }
+
+  @HostListener('focus')
+  void gotFocus() {
+    print('got Focus');
+  }
+
   @HostListener('mousedown', const ['\$event.client', '\$event.target'])
   void onMouseDown(Point<num> client, Element target) {
-    if (ripple != null) {
-      ripple.onMouseDown(client, target);
-    }
+    ripple?.onMouseDown(client, target);
   }
 
   @HostListener('mouseup')
   void onMouseUp() {
-    if (ripple != null) {
-      ripple.onMouseUp();
-    }
+    ripple?.onMouseUp();
   }
 
   @HostListener('click')
   void onClick() => menuItemClicked.add(true);
+
+  @HostListener('keydown', const ['\$event'])
+  void onKeyDown(KeyboardEvent event) {
+    keyPressed.add({'item': this, 'event': event});
+  }
+
+  void keyRipple(Element target) {
+    ripple?.onMouseDown(null, target, true);
+  }
 }
 
 const List<Type> menu = const [Menu, MenuButton, MenuItem];
