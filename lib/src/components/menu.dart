@@ -18,7 +18,7 @@ const int downArrow = 40;
 class MenuButtonNotifier {
   EventEmitter<ButtonMessage> buttonInfo = new EventEmitter<ButtonMessage>();
 
-  void info(ButtonMessage info) {
+  void notify(ButtonMessage info) {
     buttonInfo.add(info);
   }
 }
@@ -38,7 +38,8 @@ class MenuButton implements AfterContentInit, OnDestroy {
   @Input()
   String buttonId;
 
-  bool open = false;
+//
+//  bool open = false;
 
   StreamSubscription<bool> focusListener;
 
@@ -51,11 +52,11 @@ class MenuButton implements AfterContentInit, OnDestroy {
     while (!(target.localName == 'button')) {
       target = target.parent;
     }
-    menuButtonNotifier.info(new ButtonMessage(buttonId, 'click', target));
+    menuButtonNotifier.notify(new ButtonMessage(buttonId, 'click', target));
   }
 
   void focusHandler(bool focused) {
-    menuButtonNotifier.info(new ButtonMessage(buttonId, 'focus', focused));
+    menuButtonNotifier.notify(new ButtonMessage(buttonId, 'focus', focused));
   }
 
   @HostListener('keydown', const ['\$event'])
@@ -63,7 +64,8 @@ class MenuButton implements AfterContentInit, OnDestroy {
     int keyCode = event.keyCode;
     if ([upArrow, downArrow].contains(keyCode)) {
       event.preventDefault();
-      menuButtonNotifier.info(new ButtonMessage(buttonId, 'keydown', keyCode));
+      menuButtonNotifier
+          .notify(new ButtonMessage(buttonId, 'keydown', keyCode));
     }
   }
 
@@ -125,9 +127,10 @@ class Menu implements AfterContentInit, OnDestroy {
 
   bool open = false;
   bool buttonFocused = false;
-  bool menuFocused = false;
+  bool willCheckFocus = false;
 
-  bool get focused => menuFocused || buttonFocused;
+  bool get focused =>
+      buttonFocused || menuItems.any((MenuItem i) => i.isFocused);
 
   String left,
       right,
@@ -261,16 +264,16 @@ class Menu implements AfterContentInit, OnDestroy {
     }));
 
     for (MenuItem menuItem in menuItems) {
-      subscriptions.add(menuItem.menuItemClicked.listen((bool isClicked) {
+      subscriptions.add(menuItem.menuItemClicked.listen((_) {
         new Timer(new Duration(milliseconds: closeTimeout), () {
           hide();
         });
       }));
-      subscriptions.add(menuItem.keyPressed.listen((Map<String, dynamic> data) {
+      subscriptions.add(menuItem.keyDown.listen((Map<String, dynamic> data) {
         handleItemKeyboardEvent(data['item'], data['event']);
       }));
-      subscriptions.add(menuItem.focusChange.listen((bool data) {
-        handleMenuFocusEvents(data);
+      subscriptions.add(menuItem.focusChange.listen((_) {
+        handleMenuFocusEvents();
       }));
     }
   }
@@ -279,16 +282,22 @@ class Menu implements AfterContentInit, OnDestroy {
     if (open && !focused) {
       hide();
     }
+    willCheckFocus = false;
   }
 
   void handleForFocusEvents(bool hasFocus) {
     buttonFocused = hasFocus;
-    new Timer(new Duration(milliseconds: 250), checkFocus);
+    if (!willCheckFocus) {
+      willCheckFocus = true;
+      new Timer(new Duration(milliseconds: 250), checkFocus);
+    }
   }
 
-  void handleMenuFocusEvents(bool hasFocus) {
-    menuFocused = hasFocus;
-    new Timer(new Duration(milliseconds: 250), checkFocus);
+  void handleMenuFocusEvents() {
+    if (!willCheckFocus) {
+      willCheckFocus = true;
+      new Timer(new Duration(milliseconds: 250), checkFocus);
+    }
   }
 
   void ngOnDestroy() {
@@ -331,6 +340,8 @@ class MenuItem {
 
   bool get isDisabled => disabled == '' ? true : disabled;
 
+  bool isFocused = false;
+
   @ViewChild(Ripple)
   Ripple ripple;
 
@@ -338,7 +349,7 @@ class MenuItem {
   EventEmitter<bool> menuItemClicked = new EventEmitter<bool>();
 
   @Output()
-  EventEmitter<Map<String, dynamic>> keyPressed =
+  EventEmitter<Map<String, dynamic>> keyDown =
   new EventEmitter<Map<String, dynamic>>();
 
   @Output()
@@ -358,12 +369,14 @@ class MenuItem {
 
   @HostListener('focus')
   void gotFocus() {
-    focusChange.add(true);
+    isFocused = true;
+    focusChange.add(isFocused);
   }
 
   @HostListener('blur')
   void blurred() {
-    focusChange.add(false);
+    isFocused = false;
+    focusChange.add(isFocused);
   }
 
   @HostListener('mousedown', const ['\$event.client', '\$event.target'])
@@ -381,7 +394,7 @@ class MenuItem {
 
   @HostListener('keydown', const ['\$event'])
   void onKeyDown(dynamic event) {
-    keyPressed.add({'item': this, 'event': event});
+    keyDown.add({'item': this, 'event': event});
   }
 
   void keyRipple(dynamic target) {
