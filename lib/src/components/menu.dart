@@ -264,16 +264,17 @@ class Menu implements AfterContentInit, OnDestroy {
     }));
 
     for (MenuItem menuItem in menuItems) {
-      subscriptions.add(menuItem.menuItemClicked.listen((_) {
-        new Timer(new Duration(milliseconds: closeTimeout), () {
-          hide();
-        });
-      }));
-      subscriptions.add(menuItem.keyDown.listen((Map<String, dynamic> data) {
-        handleItemKeyboardEvent(data['item'], data['event']);
-      }));
-      subscriptions.add(menuItem.focusChange.listen((_) {
-        handleMenuFocusEvents();
+      subscriptions
+          .add(menuItem.menuItemNotifier.listen((MenuItemMessage info) {
+        if (info.message == 'click') {
+          new Timer(new Duration(milliseconds: closeTimeout), () {
+            hide();
+          });
+        } else if (info.message == 'keydown') {
+          handleItemKeyboardEvent(info.data['item'], info.data['event']);
+        } else if (info.message == 'focus') {
+          handleMenuFocusEvents();
+        }
       }));
     }
   }
@@ -306,6 +307,13 @@ class Menu implements AfterContentInit, OnDestroy {
     }
     subscriptions.clear();
   }
+}
+
+class MenuItemMessage {
+  String message;
+  dynamic data;
+
+  MenuItemMessage(this.message, [this.data]);
 }
 
 @Component(
@@ -346,14 +354,8 @@ class MenuItem {
   Ripple ripple;
 
   @Output()
-  EventEmitter<bool> menuItemClicked = new EventEmitter<bool>();
-
-  @Output()
-  EventEmitter<Map<String, dynamic>> keyDown =
-  new EventEmitter<Map<String, dynamic>>();
-
-  @Output()
-  EventEmitter<bool> focusChange = new EventEmitter<bool>();
+  EventEmitter<MenuItemMessage> menuItemNotifier =
+  new EventEmitter<MenuItemMessage>();
 
   bool active = false;
   String transitionDelay = '';
@@ -370,13 +372,13 @@ class MenuItem {
   @HostListener('focus')
   void gotFocus() {
     isFocused = true;
-    focusChange.add(isFocused);
+    menuItemNotifier.add(new MenuItemMessage('focus'));
   }
 
   @HostListener('blur')
   void blurred() {
     isFocused = false;
-    focusChange.add(isFocused);
+    menuItemNotifier.add(new MenuItemMessage('focus'));
   }
 
   @HostListener('mousedown', const ['\$event.client', '\$event.target'])
@@ -390,11 +392,12 @@ class MenuItem {
   }
 
   @HostListener('click')
-  void onClick() => menuItemClicked.add(true);
+  void onClick() => menuItemNotifier.add(new MenuItemMessage('click'));
 
   @HostListener('keydown', const ['\$event'])
   void onKeyDown(dynamic event) {
-    keyDown.add({'item': this, 'event': event});
+    menuItemNotifier
+        .add(new MenuItemMessage('keydown', {'item': this, 'event': event}));
   }
 
   void keyRipple(dynamic target) {
