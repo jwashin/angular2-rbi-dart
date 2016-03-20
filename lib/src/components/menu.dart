@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:angular2/angular2.dart';
 
+import 'package:angular2_rbi/src/util/target_util.dart';
+
 import 'ripple.dart';
 import 'button.dart';
 
@@ -49,9 +51,7 @@ class MenuButton implements AfterContentInit, OnDestroy {
   @HostListener('click', const ['\$event.target'])
   void onClick(dynamic target) {
     button.focus();
-    while (!(target.localName == 'button')) {
-      target = target.parent;
-    }
+    target = niceTarget(target, 'button');
     menuButtonNotifier.notify(new ButtonMessage(buttonId, 'click', target));
   }
 
@@ -86,7 +86,7 @@ class MenuButton implements AfterContentInit, OnDestroy {
     template: ''
         '<div *ngIf="open" class="mdl-menu__outline ng-animate" '
         '[style.height]="height" '
-        '[style.width]="width" '
+//        '[style.width]="width" '
         '[style.left]="left" '
         '[style.top]="top" '
         '[style.right]="right" '
@@ -103,7 +103,10 @@ class MenuButton implements AfterContentInit, OnDestroy {
       '.mdl-menu__outline{transition-delay:0s;'
           'padding:8px 0;'
           'transition: all .3s cubic-bezier(.4,0,.2,1);'
-          'opacity:1;transform:scale(1)}',
+          'opacity:1;transform:scale(1);'
+          'width: -webkit-max-content;'
+          'width: -moz-max-content;'
+          'width: max-content;}',
       '.mdl-menu__outline.ng-enter{transform: scale(0)}',
       '.mdl-menu__outline.ng-enter-active{transform: scale(1);}',
       '.mdl-menu__item{font-weight:bold:}',
@@ -127,7 +130,7 @@ class Menu implements AfterContentInit, OnDestroy {
 
   bool open = false;
   bool buttonFocused = false;
-  bool willCheckFocus = false;
+  bool willCheckFocusSoon = false;
 
   bool get focused =>
       buttonFocused || menuItems.any((MenuItem i) => i.isFocused);
@@ -136,13 +139,16 @@ class Menu implements AfterContentInit, OnDestroy {
       right,
       top,
       bottom,
-      width,
-      height = '';
+      height = 'auto';
 
-  void resetTransitions() {
+//  String width = 'max-content';
+
+  void resetMenu() {
+    buttonFocused = false;
     for (MenuItem item in menuItems) {
       item.transitionDelay = '';
       item.active = false;
+      item.isFocused = false;
     }
   }
 
@@ -183,7 +189,8 @@ class Menu implements AfterContentInit, OnDestroy {
   }
 
   void hide() {
-    resetTransitions();
+    resetMenu();
+//    print ('would be hiding');
     open = false;
   }
 
@@ -258,7 +265,8 @@ class Menu implements AfterContentInit, OnDestroy {
         } else if (data.message == 'keydown') {
           handleForKeyboardEvent(data.data);
         } else if (data.message == 'focus') {
-          handleForFocusEvents(data.data);
+          buttonFocused = data.data;
+          checkFocusSoon();
         }
       }
     }));
@@ -273,7 +281,7 @@ class Menu implements AfterContentInit, OnDestroy {
         } else if (info.message == 'keydown') {
           handleItemKeyboardEvent(info.data['item'], info.data['event']);
         } else if (info.message == 'focus') {
-          handleMenuFocusEvents();
+          checkFocusSoon();
         }
       }));
     }
@@ -283,20 +291,12 @@ class Menu implements AfterContentInit, OnDestroy {
     if (open && !focused) {
       hide();
     }
-    willCheckFocus = false;
+    willCheckFocusSoon = false;
   }
 
-  void handleForFocusEvents(bool hasFocus) {
-    buttonFocused = hasFocus;
-    if (!willCheckFocus) {
-      willCheckFocus = true;
-      new Timer(new Duration(milliseconds: 250), checkFocus);
-    }
-  }
-
-  void handleMenuFocusEvents() {
-    if (!willCheckFocus) {
-      willCheckFocus = true;
+  void checkFocusSoon() {
+    if (!willCheckFocusSoon) {
+      willCheckFocusSoon = true;
       new Timer(new Duration(milliseconds: 250), checkFocus);
     }
   }
@@ -327,7 +327,7 @@ class MenuItemMessage {
         '  </div>'
         '</div>',
     styles: const [
-      '.item-text{overflow:hidden; opacity:1;  '
+      '.item-text{opacity:1;  '
           'transition:all .3s cubic-bezier(.4,0,.2,1);'
           'font-family: \'Roboto\',\'Helvetica\',\'Arial\',sans-serif;}',
       '.item-text.ng-enter {opacity: 0;}',
@@ -342,6 +342,8 @@ class MenuItem {
   Renderer renderer;
 
   MenuItem(this.ref, this.renderer);
+
+  @HostBinding('style.position') String position = 'relative';
 
   @Input()
   dynamic disabled = false;
@@ -383,6 +385,7 @@ class MenuItem {
 
   @HostListener('mousedown', const ['\$event.client', '\$event.target'])
   void onMouseDown(dynamic client, dynamic target) {
+    target = niceTarget(target, 'button');
     ripple?.onMouseDown(client, target);
   }
 
