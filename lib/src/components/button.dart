@@ -3,12 +3,12 @@ library material_component_button;
 import 'package:angular2/angular2.dart';
 
 import 'ripple.dart';
-import 'package:angular2_rbi/src/util/target_util.dart';
 
 @Component(
     selector: 'button.mdl-js-button',
     template: '<ng-content></ng-content>'
-        '<span *ngIf="shouldRipple" class="mdl-button__ripple-container">'
+        '<span *ngIf="shouldRipple && !isDisabled" '
+        'class="mdl-button__ripple-container">'
         '</span>',
     directives: const [NgIf, Ripple])
 class Button {
@@ -16,10 +16,6 @@ class Button {
   Renderer renderer;
 
   Button(this.renderer, this.ref);
-
-  // use relative positioning so mouse clicks are positioned with respect to the
-  // button for ripple
-//  @HostBinding('style.position') String position = 'relative';
 
   @ViewChild(Ripple)
   Ripple ripple;
@@ -34,8 +30,6 @@ class Button {
   @Input()
   dynamic disabled = false;
 
-  @HostBinding('style.position') String position = 'relative';
-
   @Output()
   EventEmitter<bool> hasFocus = new EventEmitter<bool>();
 
@@ -49,27 +43,24 @@ class Button {
 
   void blur() => renderer.invokeElementMethod(ref.nativeElement, 'blur', []);
 
-  @HostListener('mousedown', const ['\$event.client', '\$event.target'])
-  void onMouseDown(dynamic client, dynamic target) {
-    if (!isDisabled) {
-      if (shouldRipple) {
-        //ripple the button, not its contents
-        target = niceTarget(target, 'button');
-        ripple.onMouseDown(client, target);
-      }
-    }
-  }
-
-  @HostListener('touchstart', const ['\$event.touches[0]', '\$event.target'])
-  void onTouchStart(dynamic client, dynamic target) =>
-      onMouseDown(client, target);
-
   @HostListener('mouseup')
   void onMouseUp() {
-    ripple?.onMouseUp();
+//    ripple?.endRipple();
     if (!keepFocus) {
       blur();
     }
+  }
+
+  @HostListener('mousedown',
+      const ['\$event.client', '\$event.target.getBoundingClientRect()'])
+  void onMouseDown(dynamic client, dynamic target) {
+    ripple?.startRipple(target, client);
+  }
+
+  @HostListener('touchstart',
+      const ['\$event.touches[0]', '\$event.target.getBoundingClientRect()'])
+  void onTouchStart(dynamic client, dynamic target) {
+    onMouseDown(client, target);
   }
 
   @HostListener('mouseleave')

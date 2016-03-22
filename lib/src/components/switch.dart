@@ -16,7 +16,7 @@ import 'ripple.dart';
         '  <span class="mdl-switch__focus-helper"></span>'
         '</div>'
         '<span *ngIf="shouldRipple" class="mdl-switch__ripple-container" '
-        '[centered]="true">'
+        '>'
         '</span>',
     directives: const [NgIf, Ripple])
 class Switch implements AfterContentInit, OnDestroy {
@@ -37,12 +37,24 @@ class Switch implements AfterContentInit, OnDestroy {
   @ContentChild(NgModel)
   NgModel ngModelInput;
 
+  @ViewChild(Ripple)
+  Ripple ripple;
+
   List<StreamSubscription<bool>> subscriptions = [];
+
+  @HostListener('mousedown')
+  void onMouseDown() {
+    if (checkboxInput != null && !isDisabled) {
+      ripple?.startRipple(ripple.ref.nativeElement.getBoundingClientRect());
+      Timer.run(() => checkboxInput.onFocus());
+    }
+  }
 
   @HostListener('mouseup')
   void onMouseUp() {
     if (checkboxInput != null) {
       Timer.run(() => checkboxInput.onBlur());
+//      ripple?.endRipple();
     }
   }
 

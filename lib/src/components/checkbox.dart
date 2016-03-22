@@ -8,14 +8,14 @@ import 'ripple.dart';
 import 'input_directives.dart';
 
 @Component(
-    selector: '.mdl-checkbox',
+    selector: '.mdl-js-checkbox',
     template: '<ng-content></ng-content>'
         '<span class="mdl-checkbox__focus-helper"></span>'
         '<span class="mdl-checkbox__box-outline">'
         '  <span class="mdl-checkbox__tick-outline"></span>'
         '</span>'
         '<span *ngIf="shouldRipple" class="mdl-checkbox__ripple-container" '
-        '[centered]="true"></span>',
+        '></span>',
     directives: const [NgIf, Ripple])
 class Checkbox implements AfterContentInit, OnDestroy {
   @HostBinding('class.is-checked')
@@ -31,6 +31,9 @@ class Checkbox implements AfterContentInit, OnDestroy {
   @ContentChild(InputSource)
   InputSource checkboxInput;
 
+  @ViewChild(Ripple)
+  Ripple ripple;
+
   @Input()
   bool shouldRipple = false;
 
@@ -39,6 +42,7 @@ class Checkbox implements AfterContentInit, OnDestroy {
   @HostListener('mouseup')
   void onMouseUp() {
     if (checkboxInput != null) {
+//      ripple?.endRipple();
       Timer.run(() => checkboxInput.onBlur());
     }
   }
@@ -46,8 +50,14 @@ class Checkbox implements AfterContentInit, OnDestroy {
   @HostListener('mousedown')
   void onMouseDown() {
     if (checkboxInput != null) {
+      ripple?.startRipple(ripple.ref.nativeElement.getBoundingClientRect());
       Timer.run(() => checkboxInput.onFocus());
     }
+  }
+
+  @HostListener('touchstart')
+  void onTouchStart() {
+    onMouseDown();
   }
 
   void ngAfterContentInit() {

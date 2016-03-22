@@ -1,6 +1,5 @@
 library component_ripple;
 
-import 'dart:html';
 import 'dart:math' show sqrt;
 import 'dart:async';
 import 'package:angular2/angular2.dart';
@@ -20,49 +19,46 @@ import 'package:angular2/angular2.dart';
         '></span>',
     styles: const [
       '.mdl-ripple {transform: translate(-50%, -50%) scale(1);'
-          'transition: all 0.4s cubic-bezier(0, 0, 0.2, 1);}',
+          'transition: all 0.4s cubic-bezier(0, 0, 0.2, 1);'
+          '}',
       '.mdl-ripple.ng-enter {opacity: 0;'
           'transform: translate(-50%, -50%) scale(0);}',
-      '.mdl-ripple.ng-enter-active {opacity: .4;'
+      '.mdl-ripple.ng-enter-active {opacity: 0.3;'
           'transform: translate(-50%, -50%) scale(1);}'
     ],
     directives: const [
       CORE_DIRECTIVES
     ])
 class Ripple {
-  @Input()
-  bool centered = false;
   bool active = false;
-  String rippleX, rippleY, rippleSize;
+  String rippleX,
+      rippleY,
+      rippleSize = '';
+  ElementRef ref;
 
-  @HostListener('mousedown', const ['\$event.client', '\$event.target'])
+  Ripple(this.ref);
 
   /// Calculate center of the ripple effect and activate it.
-  void onMouseDown(Point<num> clickPoint, Element rippleTarget,
-      [bool centerOnTarget]) {
-    Rectangle<num> containerRect = rippleTarget.getBoundingClientRect();
+  /// If clickPoint is null, center on the target.
+
+  void startRipple(dynamic targetRect, [dynamic clickPoint]) {
+    active = false;
     rippleSize = '${
-        (sqrt(containerRect.width * containerRect.width
-            + containerRect.height * containerRect.height) * 2 + 2).round()}px';
-    bool centerRipple = centerOnTarget == null ? centered : centerOnTarget;
-    if (centerRipple) {
-      rippleX = '${(containerRect.right - containerRect.left) / 2}px';
-      rippleY = '${(containerRect.bottom - containerRect.top) / 2}px';
+        (sqrt(targetRect.width * targetRect.width
+            + targetRect.height * targetRect.height) * 2 + 2)
+            .round()}px';
+    if (clickPoint == null) {
+      rippleX = '${(targetRect.right - targetRect.left) / 2}px';
+      rippleY = '${(targetRect.bottom - targetRect.top) / 2}px';
     } else {
-      rippleY = '${clickPoint.y - containerRect.top}px';
-      rippleX = '${clickPoint.x - containerRect.left}px';
+      rippleY = '${clickPoint.y - targetRect.top}px';
+      rippleX = '${clickPoint.x - targetRect.left}px';
     }
     active = true;
-//    print('rippling');
-    new Timer(new Duration(milliseconds: 500), (() => active = false));
+    new Timer(new Duration(milliseconds: 500), () => active = false);
   }
 
-  @HostListener('mouseup')
-  void onMouseUp() {
+  void endRipple() {
     active = false;
   }
-
-  @HostListener('touchstart', const ['\$event.touches[0]', '\$event.target'])
-  void onTouchStart(Point<num> client, Element target) =>
-      onMouseDown(client, target);
 }

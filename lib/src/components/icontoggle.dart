@@ -6,10 +6,10 @@ import 'input_directives.dart';
 import 'ripple.dart';
 
 @Component(
-    selector: '.mdl-icon-toggle',
+    selector: '.mdl-js-icon-toggle',
     template: '<ng-content></ng-content>'
         '<span *ngIf="shouldRipple" class="mdl-icon-toggle__ripple-container" '
-        '[centered]="true"></span>',
+        '></span>',
     directives: const [NgIf, Ripple])
 class IconToggle implements AfterContentInit, OnDestroy {
   @HostBinding('class.is-checked')
@@ -29,12 +29,24 @@ class IconToggle implements AfterContentInit, OnDestroy {
   @Input()
   bool shouldRipple = false;
 
+  @ViewChild(Ripple)
+  Ripple ripple;
+
   List<StreamSubscription<bool>> subscriptions = [];
 
   @HostListener('mouseup')
   void onMouseUp() {
     if (checkboxInput != null) {
+//      ripple?.endRipple();
       Timer.run(() => checkboxInput.onBlur());
+    }
+  }
+
+  @HostListener('mousedown')
+  void onMouseDown() {
+    if (checkboxInput != null && !isDisabled) {
+      ripple?.startRipple(ripple.ref.nativeElement.getBoundingClientRect());
+      Timer.run(() => checkboxInput.onFocus());
     }
   }
 

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:angular2/angular2.dart';
 
-import 'package:angular2_rbi/src/util/target_util.dart';
+//import 'package:angular2_rbi/src/util/target_util.dart';
 
 import 'ripple.dart';
 import 'button.dart';
@@ -40,9 +40,6 @@ class MenuButton implements AfterContentInit, OnDestroy {
   @Input()
   String buttonId;
 
-//
-//  bool open = false;
-
   StreamSubscription<bool> focusListener;
 
   @ContentChild(Button)
@@ -51,7 +48,6 @@ class MenuButton implements AfterContentInit, OnDestroy {
   @HostListener('click', const ['\$event.target'])
   void onClick(dynamic target) {
     button.focus();
-    target = niceTarget(target, 'button');
     menuButtonNotifier.notify(new ButtonMessage(buttonId, 'click', target));
   }
 
@@ -86,7 +82,6 @@ class MenuButton implements AfterContentInit, OnDestroy {
     template: ''
         '<div *ngIf="open" class="mdl-menu__outline ng-animate" '
         '[style.height]="height" '
-//        '[style.width]="width" '
         '[style.left]="left" '
         '[style.top]="top" '
         '[style.right]="right" '
@@ -109,7 +104,9 @@ class MenuButton implements AfterContentInit, OnDestroy {
           'width: max-content;}',
       '.mdl-menu__outline.ng-enter{transform: scale(0)}',
       '.mdl-menu__outline.ng-enter-active{transform: scale(1);}',
-      '.mdl-menu__item{font-weight:bold:}',
+      '.mdl-menu__outline.ng-leave{transform: scale(1);}',
+      '.mdl-menu__outline.ng-leave-active{transform: scale(0);}',
+      '.mdl-menu__item{position:relative;}',
     ],
     directives: const [
       NgIf,
@@ -141,8 +138,6 @@ class Menu implements AfterContentInit, OnDestroy {
       bottom,
       height = 'auto';
 
-//  String width = 'max-content';
-
   void resetMenu() {
     buttonFocused = false;
     for (MenuItem item in menuItems) {
@@ -154,8 +149,8 @@ class Menu implements AfterContentInit, OnDestroy {
 
   void onButtonClick(dynamic button) {
     dynamic rect = button.getBoundingClientRect();
-    // parent.parent because we wrapped the button in a rbi-menu-button
-    // container
+    // parent.parent because the transformer wrapped the button in a
+    // rbi-menu-button container
     dynamic forRect = button.parent.parent.getBoundingClientRect();
     // since mdl-menu__outline sets left=top=0, we set left and top to 'auto'
     // if we are not otherwise setting them
@@ -190,7 +185,6 @@ class Menu implements AfterContentInit, OnDestroy {
 
   void hide() {
     resetMenu();
-//    print ('would be hiding');
     open = false;
   }
 
@@ -230,7 +224,7 @@ class Menu implements AfterContentInit, OnDestroy {
         }
       } else if (keyCode == space || keyCode == enter) {
         event.preventDefault();
-        item.keyRipple(event.target);
+        item.keyRipple(event.target.getBoundingClientRect());
         item.click();
       } else if (keyCode == escape) {
         event.preventDefault();
@@ -343,7 +337,8 @@ class MenuItem {
 
   MenuItem(this.ref, this.renderer);
 
-  @HostBinding('style.position') String position = 'relative';
+  @HostBinding('style.position')
+  String position = 'relative';
 
   @Input()
   dynamic disabled = false;
@@ -383,15 +378,18 @@ class MenuItem {
     menuItemNotifier.add(new MenuItemMessage('focus'));
   }
 
-  @HostListener('mousedown', const ['\$event.client', '\$event.target'])
+  @HostListener('mousedown',
+      const ['\$event.client', '\$event.target.getBoundingClientRect()'])
   void onMouseDown(dynamic client, dynamic target) {
-    target = niceTarget(target, 'button');
-    ripple?.onMouseDown(client, target);
+    if (!isDisabled) {
+      ripple?.startRipple(target, client);
+    }
   }
 
-  @HostListener('mouseup')
-  void onMouseUp() {
-    ripple?.onMouseUp();
+  @HostListener('touchstart',
+      const ['\$event.touches[0]', '\$event.target.getBoundingClientRect()'])
+  void onTouchStart(dynamic client, dynamic target) {
+    onMouseDown(client, target);
   }
 
   @HostListener('click')
@@ -404,7 +402,7 @@ class MenuItem {
   }
 
   void keyRipple(dynamic target) {
-    ripple?.onMouseDown(null, target, true);
+    ripple?.startRipple(target);
   }
 }
 

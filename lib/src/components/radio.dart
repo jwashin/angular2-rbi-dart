@@ -14,12 +14,12 @@ class RadioNotifier {
 RadioNotifier radioNotifier = new RadioNotifier();
 
 @Component(
-    selector: '.mdl-radio',
+    selector: '.mdl-js-radio',
     template: '<ng-content></ng-content>'
         '<span class="mdl-radio__outer-circle"></span>'
         '<span class="mdl-radio__inner-circle"></span>'
         '<span *ngIf="shouldRipple" class="mdl-radio__ripple-container" '
-        '[centered]="true"></span>',
+        '></span>',
     directives: const [NgIf, Ripple])
 class Radio implements OnInit, AfterContentInit, OnDestroy {
   @HostBinding('class.is-checked')
@@ -34,6 +34,9 @@ class Radio implements OnInit, AfterContentInit, OnDestroy {
   @Input()
   bool shouldRipple = false;
 
+  @ViewChild(Ripple)
+  Ripple ripple;
+
   @ContentChild(InputSource)
   InputSource radioInput;
   @ContentChild(NgModel)
@@ -43,11 +46,19 @@ class Radio implements OnInit, AfterContentInit, OnDestroy {
 
   List<StreamSubscription<dynamic>> subscriptions = [];
 
+  @HostListener('mousedown')
+  void onMouseDown() {
+    if (radioInput != null && !isDisabled) {
+      ripple?.startRipple(ripple.ref.nativeElement.getBoundingClientRect());
+    }
+  }
+
   @HostListener('mouseup')
   void onMouseUp() {
     if (radioInput != null) {
       Timer.run(() => radioInput.onBlur());
     }
+//    ripple?.endRipple();
   }
 
   RadioNotifier checkedNotifier = radioNotifier;
