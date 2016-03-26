@@ -2,12 +2,10 @@ import 'dart:async';
 
 import 'package:angular2/angular2.dart';
 
-//import 'package:angular2_rbi/src/util/target_util.dart';
-
 import 'ripple.dart';
 import 'button.dart';
 
-const num transitionDurationSeconds = 0.3;
+const num transitionDurationSeconds = 0.6;
 const num transitionDurationFraction = 0.8;
 const num closeTimeout = 150;
 
@@ -32,7 +30,7 @@ class ButtonMessage {
   String message;
   dynamic data;
 
-  ButtonMessage(this.buttonId, this.message, this.data);
+  ButtonMessage(this.buttonId, this.message, [this.data]);
 }
 
 @Component(selector: 'rbi-menu-button', template: '<ng-content></ng-content>')
@@ -45,10 +43,10 @@ class MenuButton implements AfterContentInit, OnDestroy {
   @ContentChild(Button)
   Button button;
 
-  @HostListener('click', const ['\$event.target'])
-  void onClick(dynamic target) {
+  @HostListener('click')
+  void onClick() {
     button.focus();
-    menuButtonNotifier.notify(new ButtonMessage(buttonId, 'click', target));
+    menuButtonNotifier.notify(new ButtonMessage(buttonId, 'click'));
   }
 
   void focusHandler(bool focused) {
@@ -58,7 +56,7 @@ class MenuButton implements AfterContentInit, OnDestroy {
   @HostListener('keydown', const ['\$event'])
   void onKeyDown(dynamic event) {
     int keyCode = event.keyCode;
-    if ([upArrow, downArrow].contains(keyCode)) {
+    if ([upArrow, downArrow, escape].contains(keyCode)) {
       event.preventDefault();
       menuButtonNotifier
           .notify(new ButtonMessage(buttonId, 'keydown', keyCode));
@@ -66,14 +64,16 @@ class MenuButton implements AfterContentInit, OnDestroy {
   }
 
   void ngAfterContentInit() {
-    button.keepFocus = true;
-    focusListener = button.hasFocus.listen((bool hasFocus) {
-      focusHandler(hasFocus);
-    });
+    if (button != null) {
+      button.keepFocus = true;
+      focusListener = button.hasFocus.listen((bool hasFocus) {
+        focusHandler(hasFocus);
+      });
+    }
   }
 
   void ngOnDestroy() {
-    focusListener.cancel();
+    focusListener?.cancel();
   }
 }
 
@@ -97,16 +97,15 @@ class MenuButton implements AfterContentInit, OnDestroy {
     styles: const [
       '.mdl-menu__outline{transition-delay:0s;'
           'padding:8px 0;'
-          'transition: all .3s cubic-bezier(.4,0,.2,1);'
+          'transition: all .4s cubic-bezier(.4,0,.2,1);'
           'opacity:1;transform:scale(1);'
           'width: -webkit-max-content;'
           'width: -moz-max-content;'
           'width: max-content;}',
-      '.mdl-menu__outline.ng-enter{transform: scale(0)}',
+      '.mdl-menu__outline.ng-enter{transform: scale(0);}',
       '.mdl-menu__outline.ng-enter-active{transform: scale(1);}',
       '.mdl-menu__outline.ng-leave{transform: scale(1);}',
       '.mdl-menu__outline.ng-leave-active{transform: scale(0);}',
-      '.mdl-menu__item{position:relative;}',
     ],
     directives: const [
       NgIf,
@@ -147,27 +146,25 @@ class Menu implements AfterContentInit, OnDestroy {
     }
   }
 
-  void onButtonClick(dynamic button) {
-    dynamic rect = button.getBoundingClientRect();
-    // parent.parent because the transformer wrapped the button in a
-    // rbi-menu-button container
-    dynamic forRect = button.parent.parent.getBoundingClientRect();
-    // since mdl-menu__outline sets left=top=0, we set left and top to 'auto'
-    // if we are not otherwise setting them
-    if (projection == 'bottom-left' || projection == '') {
-      left = '${button.offsetLeft}px';
-      top = '${button.offsetTop + button.offsetHeight}px';
+  void onButtonClick() {
+//    This is easy when we are sure the Menu is enclosed in an element with
+//    position:relative. Stylesheet sets left=top=0, so we must set those to
+//    auto if we are not setting them.
+
+    if (projection == 'bottom-left' || projection.isEmpty) {
+      left = '0px';
+      top = '0px';
     } else if (projection == 'bottom-right') {
-      right = '${forRect.right - rect.right}px';
-      top = '${button.offsetTop + button.offsetHeight}px';
+      right = '0px';
+      top = '0px';
       left = 'auto';
     } else if (projection == 'top-left') {
-      left = '${button.offsetLeft}px';
-      bottom = '${forRect.bottom - rect.top}px';
+      left = '0px';
+      bottom = '0px';
       top = 'auto';
     } else if (projection == 'top-right') {
-      right = '${forRect.right - rect.right}px';
-      bottom = '${forRect.bottom - rect.top}px';
+      right = '0px';
+      bottom = '0px';
       left = 'auto';
       top = 'auto';
     }
@@ -192,11 +189,13 @@ class Menu implements AfterContentInit, OnDestroy {
     List<MenuItem> items = menuItems
         .where((MenuItem item) => !item.isDisabled)
         .toList(growable: false);
-    if (items.length > 0 && open) {
+    if (items.isNotEmpty && open) {
       if (keyCode == upArrow) {
         items.last.focus();
       } else if (keyCode == downArrow) {
         items.first.focus();
+      } else if (keyCode == escape) {
+        hide();
       }
     }
   }
@@ -206,14 +205,14 @@ class Menu implements AfterContentInit, OnDestroy {
         .where((MenuItem item) => !item.isDisabled)
         .toList(growable: false);
     int keyCode = event.keyCode;
-    if (items.length > 0) {
+    if (items.isNotEmpty) {
       int currentIndex = items.indexOf(item);
       if (keyCode == upArrow) {
         event.preventDefault();
         if (currentIndex > 0) {
           items[currentIndex - 1].focus();
         } else {
-          items[items.length - 1].focus();
+          items.last.focus();
         }
       } else if (keyCode == downArrow) {
         event.preventDefault();
@@ -255,7 +254,7 @@ class Menu implements AfterContentInit, OnDestroy {
         .add(menuButtonNotifier.buttonInfo.listen((ButtonMessage data) {
       if (data.buttonId == buttonId) {
         if (data.message == 'click') {
-          onButtonClick(data.data);
+          onButtonClick();
         } else if (data.message == 'keydown') {
           handleForKeyboardEvent(data.data);
         } else if (data.message == 'focus') {
@@ -337,8 +336,20 @@ class MenuItem {
 
   MenuItem(this.ref, this.renderer);
 
+  // relative position gives the absolutely positioned animation a reference
   @HostBinding('style.position')
   String position = 'relative';
+
+  // MDL sets opacity to 0 for animation; we don't want that.
+  @HostBinding('style.opacity')
+  String opacity = '1';
+
+  // button width needs to be 100% to fill the width of the menu
+  @HostBinding('style.width')
+  String width = '100%';
+
+//  @HostBinding('style.display')
+//  String display = 'inline-block';
 
   @Input()
   dynamic disabled = false;

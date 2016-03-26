@@ -23,66 +23,31 @@ import 'package:angular2/angular2.dart';
 ///       `int sliderValue1 = 0;`
 ///
 
-num asNumber(dynamic aValue) {
-  return aValue is String ? num.parse(aValue) : aValue;
-}
-
-@Directive(selector: '.mdl-js-slider')
-class SliderElement implements OnChanges {
-  @Input()
-  dynamic min = 0;
-  @Input()
-  dynamic max = 100;
-  @Input()
-  dynamic value = 0;
-  @Input()
-  bool disabled = false;
-
-  @HostBinding('class.is-upgraded')
-  bool isUpgraded = true;
-  @HostBinding('class.is-lowest-value')
-  bool valueIsLowestValue = false;
-  @HostBinding('class.is-disabled')
-  bool isDisabled = false;
-
-  @HostListener('change', const ['\$event.target.value'])
-  void onChange(dynamic value) => updateValueAndStyles(value);
-
-  @HostListener('input', const ['\$event.target.value'])
-  void onInput(dynamic value) => updateValueAndStyles(value);
-
-  @HostListener('mouseup', const ['\$event.target'])
-  void onMouseUp(dynamic target) => target.blur();
-
-  void updateValueAndStyles(dynamic inputValue) {
-    value = inputValue;
-    num calcValue = asNumber(inputValue);
-    num calcMin = asNumber(min);
-    valueIsLowestValue = calcValue == calcMin;
-  }
-
-  void ngOnChanges(Map<String, SimpleChange> changes) {
-    if (changes.containsKey('disabled')) {
-      isDisabled = changes['disabled'].currentValue;
-    }
-  }
-}
-
 @Component(
-    selector: '.mdl-slider__container', template: '<ng-content></ng-content>')
+    selector: 'rbi-slider',
+    template: ''
+        '<div class="mdl-slider__container">'
+        '  <ng-content></ng-content>'
+        '  <div class="mdl-slider__background-flex">'
+        '    <div [style.flex]="lowerFlex" '
+        '    class="mdl-slider__background-lower"></div>'
+        '    <div [style.flex]="upperFlex"'
+        '     class="mdl-slider__background-upper"></div>'
+        '  </div>'
+        '</div>'
+)
 class Slider implements AfterContentInit, OnDestroy {
   @ContentChild(SliderElement)
   SliderElement sliderElement;
-  @ContentChild(SliderBackgroundLower)
-  SliderBackgroundLower backgroundLower;
-  @ContentChild(SliderBackgroundUpper)
-  SliderBackgroundUpper backgroundUpper;
   @ContentChild(NgModel)
   NgModel ngModelInput;
 
   num max = 0;
   num min = 100;
   num value = 0;
+
+  String upperFlex = '';
+  String lowerFlex = '';
 
   List<StreamSubscription<dynamic>> subscriptions = [];
 
@@ -108,8 +73,8 @@ class Slider implements AfterContentInit, OnDestroy {
 
   void setSliderValues() {
     num fraction = (value - min) / (max - min);
-    backgroundLower.flex = '$fraction';
-    backgroundUpper.flex = '${1.0 - fraction}';
+    lowerFlex = '$fraction';
+    upperFlex = '${1.0 - fraction}';
   }
 
   void ngOnDestroy() {
@@ -120,21 +85,43 @@ class Slider implements AfterContentInit, OnDestroy {
   }
 }
 
-@Directive(selector: '.mdl-slider__background-lower')
-class SliderBackgroundLower {
-  @HostBinding('style.flex')
-  String flex = '0.0';
+num asNumber(dynamic aValue) {
+  return aValue is String ? num.parse(aValue) : aValue;
 }
 
-@Directive(selector: '.mdl-slider__background-upper')
-class SliderBackgroundUpper {
-  @HostBinding('style.flex')
-  String flex = '1.0';
+@Directive(selector: 'input.mdl-js-slider')
+class SliderElement {
+  @Input()
+  dynamic min = 0;
+  @Input()
+  dynamic max = 100;
+  @Input()
+  dynamic value = 0;
+  @Input()
+  dynamic disabled = false;
+
+  @HostBinding('class.is-upgraded')
+  bool isUpgraded = true;
+  @HostBinding('class.is-lowest-value')
+  bool valueIsLowestValue = false;
+
+  bool get isDisabled => disabled == '' ? true : disabled;
+
+  @HostListener('change', const ['\$event.target.value'])
+  void onChange(dynamic value) => updateValueAndStyles(value);
+
+  @HostListener('input', const ['\$event.target.value'])
+  void onInput(dynamic value) => updateValueAndStyles(value);
+
+  @HostListener('mouseup', const ['\$event.target'])
+  void onMouseUp(dynamic target) => target.blur();
+
+  void updateValueAndStyles(dynamic inputValue) {
+    value = inputValue;
+    num calcValue = asNumber(inputValue);
+    num calcMin = asNumber(min);
+    valueIsLowestValue = calcValue == calcMin;
+  }
 }
 
-const List<Type> slider = const [
-  SliderElement,
-  Slider,
-  SliderBackgroundUpper,
-  SliderBackgroundLower
-];
+const List<Type> slider = const [Slider, SliderElement];

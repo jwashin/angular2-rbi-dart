@@ -82,18 +82,23 @@ class UpdateHtml extends Transformer {
           prevButton != null && prevButton.localName == 'button';
       if (hasPrevButton) {
         Element parent = prevButton.parent;
+        // It doesn't matter what the local name of the widget container is,
+        // as long as it has position:relative.
+        Element widgetContainer = new Element.tag('rbi-menu');
+        widgetContainer.attributes.addAll({'style':'position:relative'});
+        parent.insertBefore(widgetContainer, prevButton);
         Element buttonContainer = new Element.tag('rbi-menu-button');
         buttonContainer.attributes.addAll({'[buttonId]': "\'$elFor\'"});
         buttonContainer.append(prevButton);
-        parent.append(buttonContainer);
+        widgetContainer.append(buttonContainer);
         Element menuContainer = new Element.tag('rbi-menu-container');
         bool rippling = element.classes.contains('mdl-js-ripple-effect') ||
             element.classes.contains('[shouldRipple]');
         for (Element li in element.querySelectorAll('.mdl-menu__item')) {
           Element newElement = cloneWithNewTag(li, 'button');
-          String style = 'opacity:1;width:100%';
+//          String style = 'opacity:1;width:100%';
           newElement.attributes.addAll({
-            'style': style,
+//            'style': style,
             '[shouldRipple]': '$rippling',
             'tabindex': '-1',
           });
@@ -107,30 +112,22 @@ class UpdateHtml extends Transformer {
           '[shouldRipple]': '$rippling'
         };
         menuContainer.attributes.addAll(attributes);
-        parent.append(menuContainer);
+        widgetContainer.append(menuContainer);
         element.remove();
       }
     }
   }
 
-  /// MDL slider input gets a container and new tags for display.
+  /// MDL slider input gets an rbi-slider container.
   void fixSliders() {
-    List<Element> sliders = document.querySelectorAll('.mdl-slider');
+    List<Element> sliders = document.querySelectorAll('.mdl-js-slider');
     for (Element element in sliders) {
       Element parent = element.parent;
-      Element container = new Element.tag('div');
-      container.classes.add('mdl-slider__container');
-      parent.append(container);
-      container.append(element);
-      Element backgroundFlex = new Element.tag('div');
-      backgroundFlex.classes.add('mdl-slider__background-flex');
-      Element backgroundLower = new Element.tag('div');
-      backgroundLower.classes.add('mdl-slider__background-lower');
-      backgroundFlex.append(backgroundLower);
-      Element backgroundUpper = new Element.tag('div');
-      backgroundUpper.classes.add('mdl-slider__background-upper');
-      backgroundFlex.append(backgroundUpper);
-      container.append(backgroundFlex);
+      if (parent.localName != 'rbi-slider') {
+        Element container = new Element.tag('rbi-slider');
+        parent.insertBefore(container, element);
+        container.append(element);
+      }
     }
   }
 }

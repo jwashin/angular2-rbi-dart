@@ -4,6 +4,10 @@ import 'package:angular2/angular2.dart';
 
 import 'ripple.dart';
 
+/// MDL Button component
+/// The transformer looks for class 'mdl-js-ripple-effect' and replaces it with
+/// [shouldRipple]="true".
+
 @Component(
     selector: 'button.mdl-js-button',
     template: '<ng-content></ng-content>'
@@ -45,7 +49,6 @@ class Button {
 
   @HostListener('mouseup')
   void onMouseUp() {
-//    ripple?.endRipple();
     if (!keepFocus) {
       blur();
     }

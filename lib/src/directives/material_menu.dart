@@ -32,9 +32,9 @@ const int UP_ARROW = 38;
 const int DOWN_ARROW = 40;
 
 //time constants
-const double TRANSITION_DURATION_SECONDS = 0.3;
-const double TRANSITION_DURATION_FRACTION = 0.8;
-const int CLOSE_TIMEOUT = 150;
+const num TRANSITION_DURATION_SECONDS = 0.3;
+const num TRANSITION_DURATION_FRACTION = 0.8;
+const num CLOSE_TIMEOUT = 150;
 
 class MenuBehavior {
   Element element;
