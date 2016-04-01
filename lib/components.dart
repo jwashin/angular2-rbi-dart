@@ -8,6 +8,8 @@ import 'src/components/radio.dart';
 import 'src/components/input_directives.dart';
 import 'src/components/textfield.dart';
 import 'src/components/menu.dart';
+import 'src/components/spinner.dart';
+import 'src/components/progress.dart';
 
 export 'src/components/button.dart';
 export 'src/components/checkbox.dart';
@@ -19,6 +21,9 @@ export 'src/components/ripple.dart';
 export 'src/components/input_directives.dart';
 export 'src/components/textfield.dart';
 export 'src/components/menu.dart';
+export 'src/components/spinner.dart';
+export 'src/components/progress.dart';
+
 
 const List<Type> rbiComponents = const [
   Button,
@@ -30,5 +35,7 @@ const List<Type> rbiComponents = const [
   IconToggle,
   Radio,
   Textfield,
-  menu
+  menu,
+  Spinner,
+  Progress
 ];

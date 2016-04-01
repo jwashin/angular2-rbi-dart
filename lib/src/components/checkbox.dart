@@ -9,19 +9,20 @@ import 'input_directives.dart';
 
 @Component(
     selector: '.mdl-js-checkbox',
-    template: '<ng-content></ng-content>'
+    template: ''
+        '<ng-content></ng-content>'
         '<span class="mdl-checkbox__focus-helper"></span>'
         '<span class="mdl-checkbox__box-outline">'
         '  <span class="mdl-checkbox__tick-outline"></span>'
         '</span>'
-        '<span *ngIf="shouldRipple" class="mdl-checkbox__ripple-container" '
-        '></span>',
+        '<span *ngIf="shouldRipple" class="mdl-checkbox__ripple-container">'
+        '</span>',
     directives: const [NgIf, Ripple])
 class Checkbox implements AfterContentInit, OnDestroy {
   @HostBinding('class.is-checked')
   bool isChecked = false;
   @HostBinding('class.is-upgraded')
-  bool isUpgraded = true;
+  final bool isUpgraded = true;
   @HostBinding('class.is-focused')
   bool isFocused = false;
   @HostBinding('class.is-disabled')
@@ -42,7 +43,6 @@ class Checkbox implements AfterContentInit, OnDestroy {
   @HostListener('mouseup')
   void onMouseUp() {
     if (checkboxInput != null) {
-//      ripple?.endRipple();
       Timer.run(() => checkboxInput.onBlur());
     }
   }

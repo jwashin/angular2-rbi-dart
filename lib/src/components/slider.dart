@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:angular2/angular2.dart';
 
-/// Slider Directive
+/// Slider Widget
 ///     usage: make an `<input type="range">` tag with classes
 ///     'mdl-slider' (to get MDL styles)
 ///     and 'mdl-js-slider' (to get this behavior)
@@ -34,20 +34,16 @@ import 'package:angular2/angular2.dart';
         '    <div [style.flex]="upperFlex"'
         '     class="mdl-slider__background-upper"></div>'
         '  </div>'
-        '</div>'
-)
+        '</div>')
 class Slider implements AfterContentInit, OnDestroy {
+  num max, min, value;
+  String upperFlex,
+      lowerFlex = '';
+
   @ContentChild(SliderElement)
   SliderElement sliderElement;
   @ContentChild(NgModel)
   NgModel ngModelInput;
-
-  num max = 0;
-  num min = 100;
-  num value = 0;
-
-  String upperFlex = '';
-  String lowerFlex = '';
 
   List<StreamSubscription<dynamic>> subscriptions = [];
 
@@ -75,6 +71,7 @@ class Slider implements AfterContentInit, OnDestroy {
     num fraction = (value - min) / (max - min);
     lowerFlex = '$fraction';
     upperFlex = '${1.0 - fraction}';
+    sliderElement.valueIsLowestValue = value == min;
   }
 
   void ngOnDestroy() {
@@ -89,39 +86,20 @@ num asNumber(dynamic aValue) {
   return aValue is String ? num.parse(aValue) : aValue;
 }
 
-@Directive(selector: 'input.mdl-js-slider')
+@Directive(selector: 'input[type=range].mdl-js-slider')
 class SliderElement {
   @Input()
   dynamic min = 0;
   @Input()
   dynamic max = 100;
-  @Input()
-  dynamic value = 0;
-  @Input()
-  dynamic disabled = false;
 
   @HostBinding('class.is-upgraded')
-  bool isUpgraded = true;
+  final bool isUpgraded = true;
   @HostBinding('class.is-lowest-value')
   bool valueIsLowestValue = false;
 
-  bool get isDisabled => disabled == '' ? true : disabled;
-
-  @HostListener('change', const ['\$event.target.value'])
-  void onChange(dynamic value) => updateValueAndStyles(value);
-
-  @HostListener('input', const ['\$event.target.value'])
-  void onInput(dynamic value) => updateValueAndStyles(value);
-
   @HostListener('mouseup', const ['\$event.target'])
   void onMouseUp(dynamic target) => target.blur();
-
-  void updateValueAndStyles(dynamic inputValue) {
-    value = inputValue;
-    num calcValue = asNumber(inputValue);
-    num calcMin = asNumber(min);
-    valueIsLowestValue = calcValue == calcMin;
-  }
 }
 
 const List<Type> slider = const [Slider, SliderElement];

@@ -47,7 +47,7 @@ class Ripple {
 
   /// Calculate center of the ripple effect and activate it.
   /// If clickPoint is null, center on the target.
-  void startRipple(dynamic targetRect, [dynamic clickPoint]) {
+  Future<dynamic> startRipple(dynamic targetRect, [dynamic clickPoint]) async {
     active = false;
     rippleSize = '${
         (sqrt(targetRect.width * targetRect.width
