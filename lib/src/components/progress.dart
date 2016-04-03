@@ -7,12 +7,12 @@ import 'slider.dart' show asNumber;
     selector: '.mdl-js-progress',
     template: ''
         '<div class="progressbar bar bar1" '
-        '    [style.width]="progressPercent | percent">'
+        '    [style.width]="progressFraction | percent">'
         '</div>'
         '<div class="bufferbar bar bar2" '
-        '    [style.width]="bufferPercent | percent">'
+        '    [style.width]="bufferFraction | percent">'
         '</div>'
-        '<div class="auxbar bar bar3" [style.width]="auxPercent | percent">'
+        '<div class="auxbar bar bar3" [style.width]="auxFraction | percent">'
         '</div>'
         '',
     pipes: const [COMMON_PIPES])
