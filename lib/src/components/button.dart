@@ -1,4 +1,4 @@
-library material_component_button;
+library rbi_components_button;
 
 import 'package:angular2/angular2.dart';
 

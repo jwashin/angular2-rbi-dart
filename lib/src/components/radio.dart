@@ -1,3 +1,5 @@
+library rbi_components_radio;
+
 import 'dart:async';
 import 'package:angular2/angular2.dart';
 import 'ripple.dart';

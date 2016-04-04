@@ -1,4 +1,4 @@
-library component_switch;
+library rbi_components_switch;
 
 import 'dart:async';
 

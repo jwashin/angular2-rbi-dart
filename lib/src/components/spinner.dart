@@ -1,4 +1,4 @@
-library spinner;
+library rbi_components_spinner;
 
 import 'package:angular2/angular2.dart';
 

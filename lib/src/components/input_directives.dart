@@ -1,3 +1,5 @@
+library rbi_components_input_directives;
+
 import 'package:angular2/angular2.dart';
 
 /// Input element. We need to know the focused state of the element for the

@@ -1,4 +1,4 @@
-library component_checkbox;
+library rbi_components_checkbox;
 
 import 'dart:async';
 

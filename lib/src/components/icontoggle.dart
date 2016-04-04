@@ -1,4 +1,4 @@
-library component_icon_toggle;
+library rbi_component_icon_toggle;
 
 import 'dart:async';
 import 'package:angular2/angular2.dart';

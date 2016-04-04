@@ -1,4 +1,4 @@
-library progress.dart;
+library rbi_components_progress;
 
 import 'package:angular2/angular2.dart';
 import 'slider.dart' show asNumber;
